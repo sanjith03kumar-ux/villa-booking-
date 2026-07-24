@@ -233,11 +233,33 @@
 
   /* INVOICE PRINT */
   #invoice-modal .modal-box { max-width: 800px; }
+  @page { size: A4 portrait; margin: 10mm; }
   @media print {
+    html, body { width: 100%; height: auto !important; background: #fff !important; overflow: visible !important; }
     body * { visibility: hidden; }
     #print-area, #print-area * { visibility: visible; }
-    #print-area { position: fixed; top: 0; left: 0; width: 100%; padding: 20px; margin: 0; background: white; }
+    /* IMPORTANT: static (not fixed) positioning — fixed elements paginate incorrectly
+       on mobile browsers and cause a stray/blank second page */
+    #invoice-modal, .modal-overlay { position: static !important; display: block !important; overflow: visible !important; height: auto !important; background: none !important; padding: 0 !important; }
+    #invoice-modal .modal-box { position: static !important; max-width: 100% !important; width: 100% !important; max-height: none !important; overflow: visible !important; box-shadow: none !important; border: none !important; padding: 0 !important; margin: 0 !important; }
+    #print-area { position: static !important; width: 100% !important; max-width: 100% !important; padding: 0 !important; margin: 0 !important; background: white; }
     .no-print { display: none !important; }
+
+    /* Force the proper multi-column invoice layout for print, regardless of the
+       phone's narrow screen width (mobile media queries below must not leak into print) */
+    .invoice-wrap { font-size: 11px !important; line-height: 1.4 !important; width: 100% !important; }
+    .inv-header { flex-direction: row !important; align-items: center !important; justify-content: space-between !important; gap: 12px !important; }
+    .inv-title-block { text-align: right !important; }
+    .inv-grid { grid-template-columns: 1fr 1fr !important; }
+    .inv-grid-3 { grid-template-columns: 1fr 1fr 1fr !important; }
+    .inv-charges-table { display: table !important; width: 100% !important; white-space: normal !important; overflow: visible !important; }
+    .inv-sign-grid { grid-template-columns: 1fr 1fr !important; gap: 20px !important; }
+
+    /* Keep related content together instead of splitting awkwardly across pages */
+    .inv-header, .inv-section, .inv-charges-table tr, .inv-terms, .inv-sign-grid, .inv-footer {
+      page-break-inside: avoid; break-inside: avoid;
+    }
+    .inv-terms { page-break-before: auto; }
   }
 
   .invoice-wrap { font-family: 'DM Sans', sans-serif; color: #1a1714; font-size: 12px; line-height: 1.5; }
