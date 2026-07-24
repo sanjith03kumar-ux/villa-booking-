@@ -2,11 +2,16 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="theme-color" content="#1a4f8b" />
 <title>Crystal Villa Booking</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <style>
   :root {
     --bg: #f7f5f0;
@@ -30,10 +35,13 @@
     --shadow: 0 2px 16px rgba(0,0,0,0.08);
     --shadow-lg: 0 8px 40px rgba(0,0,0,0.12);
   }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; }
   .screen { display: none; min-height: 100vh; }
   .screen.active { display: flex; }
+  input, select, textarea, button { font-size: 16px; }
+  button, .icon-btn, .tab-btn, .pay-btn, .icon-action, .table-action, .export-btn, .add-btn, .modal-close, .logout-btn { touch-action: manipulation; }
 
   /* LOGIN */
   #screen-login {
@@ -52,7 +60,7 @@
   .form-group label { display: block; font-size: 12px; font-weight: 700; color: #ffffff; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
   .modal-box .form-group label { color: #1a1714; }
   .modal-box .form-section-title { color: #1a4f8b; border-bottom-color: #1a4f8b; font-size: 12px; }
-  .form-group input, .form-group select { width: 100%; padding: 10px 14px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--bg); color: var(--text); font-size: 15px; font-family: 'DM Sans', sans-serif; transition: border-color 0.2s, box-shadow 0.2s; outline: none; }
+  .form-group input, .form-group select { width: 100%; padding: 10px 14px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--bg); color: var(--text); font-size: 16px; font-family: 'DM Sans', sans-serif; transition: border-color 0.2s, box-shadow 0.2s; outline: none; }
   .form-group input:focus, .form-group select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(44,95,63,0.1); }
   .btn { width: 100%; padding: 12px; border: none; border-radius: var(--radius-sm); font-size: 15px; font-weight: 500; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: all 0.15s; display: flex; align-items: center; justify-content: center; gap: 8px; }
   .btn-primary { background: var(--accent); color: white; }
@@ -68,9 +76,9 @@
 
   /* APP LAYOUT */
   #screen-app { flex-direction: column; }
-  .app-header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 24px; display: flex; align-items: center; justify-content: space-between; height: 60px; position: sticky; top: 0; z-index: 50; }
-  .app-header .brand { font-family: 'DM Serif Display', serif; font-size: 20px; color: var(--accent); display: flex; align-items: center; gap: 8px; }
-  .header-right { display: flex; align-items: center; gap: 12px; }
+  .app-header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 24px; padding-top: env(safe-area-inset-top); display: flex; align-items: center; justify-content: space-between; min-height: 60px; position: sticky; top: 0; z-index: 50; gap: 10px; }
+  .app-header .brand { font-family: 'DM Serif Display', serif; font-size: 20px; color: var(--accent); display: flex; align-items: center; gap: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .header-right { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
   .user-badge { display: flex; align-items: center; gap: 8px; padding: 6px 12px; background: var(--surface2); border-radius: 20px; font-size: 13px; font-weight: 500; }
   .user-avatar { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: white; }
   .logout-btn { padding: 6px 14px; border: 1px solid var(--border); border-radius: 20px; background: transparent; color: var(--text2); font-size: 13px; font-family: 'DM Sans', sans-serif; cursor: pointer; }
@@ -264,13 +272,73 @@
   .inv-footer { text-align: center; margin-top: 10px; font-size: 10px; color: #888; border-top: 1px solid #e0dbd0; padding-top: 8px; }
   .inv-amount-words { font-size: 11px; color: #444; font-style: italic; margin-top: 4px; }
 
-  @media (max-width: 600px) {
-    .app-body { padding: 12px; }
-    .app-header { padding: 0 12px; }
-    .topbar { flex-direction: column; align-items: flex-start; }
+  /* ═══════ RESPONSIVE / MOBILE ═══════ */
+  @media (max-width: 768px) {
+    .app-body { padding: 14px; }
+    .app-header { padding: 0 14px; }
+    .app-header .brand { font-size: 17px; }
+    .stats-grid { grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; }
+    .stat-card { padding: 12px; }
+    .stat-card .s-val { font-size: 22px; }
+    .topbar { flex-direction: column; align-items: stretch; }
+    .topbar .nav-btns { justify-content: space-between; }
+    .topbar > div[style*="display:flex"] { width: 100%; }
     .form-row { grid-template-columns: 1fr; }
     .currency-rate-grid { grid-template-columns: 1fr; }
     .add-user-row { grid-template-columns: 1fr; }
+    .add-user-row .table-action, .add-user-row button { width: 100%; }
+    .modal-box { padding: 1.25rem; max-height: 96vh; border-radius: var(--radius-sm); }
+    .modal-actions { flex-direction: column-reverse; }
+    .modal-actions .btn-sm { width: 100%; padding: 12px; }
+    .payment-methods { gap: 6px; }
+    .pay-btn { min-width: 80px; font-size: 12px; padding: 8px 6px; }
+    .bk-grid { grid-template-columns: 1fr; }
+    .user-table-wrap, .admin-section { overflow-x: auto; }
+    .user-table { min-width: 480px; }
+    .add-user-row { align-items: stretch; }
+    .rate-field input, .rate-field select, .filter-bar select, .audit-filter-bar select, .add-user-row input, .add-user-row select { font-size: 16px; }
+  }
+
+  @media (max-width: 480px) {
+    .login-container { max-width: 100%; }
+    .login-card { padding: 1.25rem; }
+    .login-brand h1 { font-size: 2.1rem; }
+    .app-header { height: auto; min-height: 56px; padding: 8px 10px; }
+    .app-header .brand { font-size: 15px; gap: 6px; }
+    .app-header .brand svg { width: 26px; height: 26px; flex-shrink: 0; }
+    .header-right { gap: 6px; }
+    .user-badge span#user-name-display { display: none; }
+    .user-badge { padding: 5px 8px; }
+    .logout-btn { padding: 6px 10px; font-size: 12px; }
+    .app-body { padding: 10px; }
+    .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+    .tabs { width: 100%; overflow-x: auto; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; }
+    .tab-btn { padding: 8px 12px; font-size: 13px; white-space: nowrap; }
+    .month-title { font-size: 16px; }
+    .add-btn, .export-btn { padding: 9px 14px; font-size: 13px; flex: 1; justify-content: center; }
+    .topbar > div[style*="display:flex"] { flex-wrap: nowrap; }
+    .cal-wrap { border-radius: var(--radius-sm); }
+    .cal-table th, .cal-table td { padding: 3px 4px; font-size: 12px; }
+    .modal-header h3 { font-size: 17px; }
+    .form-section-title { font-size: 10px; margin: 12px 0 8px; }
+    .currency-panel { padding: 10px; }
+  }
+
+  /* Invoice preview readability on small screens (screen only, not print) */
+  @media (max-width: 700px) {
+    #invoice-modal .modal-box { max-width: 100%; padding: 1rem; }
+    .modal-header.no-print { flex-direction: column; align-items: stretch; gap: 10px; }
+    .modal-header.no-print > div { display: flex; gap: 8px; }
+    .modal-header.no-print .btn-sm { flex: 1; }
+    .inv-header { flex-direction: column; align-items: flex-start; gap: 12px; }
+    .inv-title-block { text-align: left; }
+    .inv-grid, .inv-grid-3 { grid-template-columns: 1fr 1fr; }
+    .inv-sign-grid { grid-template-columns: 1fr; gap: 24px; }
+    .inv-charges-table { display: block; overflow-x: auto; white-space: nowrap; }
+  }
+
+  @media (max-width: 420px) {
+    .inv-grid, .inv-grid-3 { grid-template-columns: 1fr; }
   }
 </style>
 </head>
@@ -570,7 +638,8 @@
     <div class="modal-header no-print">
       <h3>Guest Registration &amp; Invoice</h3>
       <div style="display:flex;gap:8px;">
-        <button class="btn-sm primary" onclick="printInvoice()">🖨️ Print / Save as PDF</button>
+        <button class="btn-sm primary" id="download-pdf-btn" onclick="downloadInvoicePDF()">📥 Download PDF</button>
+        <button class="btn-sm" onclick="printInvoice()">🖨️ Print</button>
         <button class="modal-close" onclick="closeInvoice()">✕</button>
       </div>
     </div>
@@ -1911,10 +1980,60 @@ function renderAndShowInvoice(id) {
 
   document.getElementById('print-area').innerHTML = html;
   document.getElementById('invoice-modal').classList.add('open');
+  currentInvoiceId = id;
 }
 
-function closeInvoice() { document.getElementById('invoice-modal').classList.remove('open'); }
+function closeInvoice() { document.getElementById('invoice-modal').classList.remove('open'); currentInvoiceId = null; }
 function printInvoice() { window.print(); }
+
+// ═══════════════════════════════════════════════════════
+//  DOWNLOAD INVOICE AS PDF (works on mobile, unlike relying
+//  solely on window.print() which many mobile browsers /
+//  in-app webviews don't handle well)
+// ═══════════════════════════════════════════════════════
+let currentInvoiceId = null;
+function downloadInvoicePDF() {
+  const el = document.getElementById('print-area');
+  if (!el || !el.innerHTML.trim()) return;
+  const b = bookings.find(x => x.id === currentInvoiceId);
+  const invNum = (b && b.invNum) ? 'CV-' + String(b.invNum).padStart(3, '0') : 'invoice';
+  const guestPart = b ? b.guestName.replace(/[^a-z0-9]+/gi, '-').replace(/^-+|-+$/g, '') : 'guest';
+  const filename = `${invNum}-${guestPart}.pdf`;
+
+  const btn = document.getElementById('download-pdf-btn');
+  const originalLabel = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = '⏳ Generating...';
+
+  const opt = {
+    margin: [8, 8, 8, 8],
+    filename: filename,
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff', windowWidth: 800 },
+    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+    pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+  };
+
+  if (typeof html2pdf === 'undefined') {
+    // Fallback if the PDF library failed to load (e.g. offline) — use print dialog instead
+    btn.disabled = false;
+    btn.innerHTML = originalLabel;
+    alert('PDF library could not load (check your internet connection). Opening print dialog instead — choose "Save as PDF" there.');
+    window.print();
+    return;
+  }
+
+  html2pdf().set(opt).from(el).save().then(() => {
+    btn.disabled = false;
+    btn.innerHTML = originalLabel;
+    addAudit('download_invoice', `Downloaded PDF invoice for ${b ? b.guestName : ''}`, '📥');
+  }).catch(err => {
+    console.error('PDF generation failed:', err);
+    btn.disabled = false;
+    btn.innerHTML = originalLabel;
+    alert('Could not generate the PDF. Please try the Print button instead.');
+  });
+}
 
 // ═══════════════════════════════════════════════════════
 //  NUMBER TO WORDS
