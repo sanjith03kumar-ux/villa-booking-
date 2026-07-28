@@ -2,16 +2,11 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover" />
-<meta name="mobile-web-app-capable" content="yes" />
-<meta name="apple-mobile-web-app-capable" content="yes" />
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-<meta name="theme-color" content="#1a4f8b" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Crystal Villa Booking</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <style>
   :root {
     --bg: #f7f5f0;
@@ -35,13 +30,10 @@
     --shadow: 0 2px 16px rgba(0,0,0,0.08);
     --shadow-lg: 0 8px 40px rgba(0,0,0,0.12);
   }
-  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-  html { -webkit-text-size-adjust: 100%; }
-  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
   .screen { display: none; min-height: 100vh; }
   .screen.active { display: flex; }
-  input, select, textarea, button { font-size: 16px; }
-  button, .icon-btn, .tab-btn, .pay-btn, .icon-action, .table-action, .export-btn, .add-btn, .modal-close, .logout-btn { touch-action: manipulation; }
 
   /* LOGIN */
   #screen-login {
@@ -60,7 +52,7 @@
   .form-group label { display: block; font-size: 12px; font-weight: 700; color: #ffffff; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
   .modal-box .form-group label { color: #1a1714; }
   .modal-box .form-section-title { color: #1a4f8b; border-bottom-color: #1a4f8b; font-size: 12px; }
-  .form-group input, .form-group select { width: 100%; padding: 10px 14px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--bg); color: var(--text); font-size: 16px; font-family: 'DM Sans', sans-serif; transition: border-color 0.2s, box-shadow 0.2s; outline: none; }
+  .form-group input, .form-group select { width: 100%; padding: 10px 14px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--bg); color: var(--text); font-size: 15px; font-family: 'DM Sans', sans-serif; transition: border-color 0.2s, box-shadow 0.2s; outline: none; }
   .form-group input:focus, .form-group select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(44,95,63,0.1); }
   .btn { width: 100%; padding: 12px; border: none; border-radius: var(--radius-sm); font-size: 15px; font-weight: 500; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: all 0.15s; display: flex; align-items: center; justify-content: center; gap: 8px; }
   .btn-primary { background: var(--accent); color: white; }
@@ -76,9 +68,9 @@
 
   /* APP LAYOUT */
   #screen-app { flex-direction: column; }
-  .app-header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 24px; padding-top: env(safe-area-inset-top); display: flex; align-items: center; justify-content: space-between; min-height: 60px; position: sticky; top: 0; z-index: 50; gap: 10px; }
-  .app-header .brand { font-family: 'DM Serif Display', serif; font-size: 20px; color: var(--accent); display: flex; align-items: center; gap: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .header-right { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+  .app-header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 24px; display: flex; align-items: center; justify-content: space-between; height: 60px; position: sticky; top: 0; z-index: 50; }
+  .app-header .brand { font-family: 'DM Serif Display', serif; font-size: 20px; color: var(--accent); display: flex; align-items: center; gap: 8px; }
+  .header-right { display: flex; align-items: center; gap: 12px; }
   .user-badge { display: flex; align-items: center; gap: 8px; padding: 6px 12px; background: var(--surface2); border-radius: 20px; font-size: 13px; font-weight: 500; }
   .user-avatar { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: white; }
   .logout-btn { padding: 6px 14px; border: 1px solid var(--border); border-radius: 20px; background: transparent; color: var(--text2); font-size: 13px; font-family: 'DM Sans', sans-serif; cursor: pointer; }
@@ -233,33 +225,11 @@
 
   /* INVOICE PRINT */
   #invoice-modal .modal-box { max-width: 800px; }
-  @page { size: A4 portrait; margin: 10mm; }
   @media print {
-    html, body { width: 100%; height: auto !important; background: #fff !important; overflow: visible !important; }
     body * { visibility: hidden; }
     #print-area, #print-area * { visibility: visible; }
-    /* IMPORTANT: static (not fixed) positioning — fixed elements paginate incorrectly
-       on mobile browsers and cause a stray/blank second page */
-    #invoice-modal, .modal-overlay { position: static !important; display: block !important; overflow: visible !important; height: auto !important; background: none !important; padding: 0 !important; }
-    #invoice-modal .modal-box { position: static !important; max-width: 100% !important; width: 100% !important; max-height: none !important; overflow: visible !important; box-shadow: none !important; border: none !important; padding: 0 !important; margin: 0 !important; }
-    #print-area { position: static !important; width: 100% !important; max-width: 100% !important; padding: 0 !important; margin: 0 !important; background: white; }
+    #print-area { position: fixed; top: 0; left: 0; width: 100%; padding: 20px; margin: 0; background: white; }
     .no-print { display: none !important; }
-
-    /* Force the proper multi-column invoice layout for print, regardless of the
-       phone's narrow screen width (mobile media queries below must not leak into print) */
-    .invoice-wrap { font-size: 11px !important; line-height: 1.4 !important; width: 100% !important; }
-    .inv-header { flex-direction: row !important; align-items: center !important; justify-content: space-between !important; gap: 12px !important; }
-    .inv-title-block { text-align: right !important; }
-    .inv-grid { grid-template-columns: 1fr 1fr !important; }
-    .inv-grid-3 { grid-template-columns: 1fr 1fr 1fr !important; }
-    .inv-charges-table { display: table !important; width: 100% !important; white-space: normal !important; overflow: visible !important; }
-    .inv-sign-grid { grid-template-columns: 1fr 1fr !important; gap: 20px !important; }
-
-    /* Keep related content together instead of splitting awkwardly across pages */
-    .inv-header, .inv-section, .inv-charges-table tr, .inv-terms, .inv-sign-grid, .inv-footer {
-      page-break-inside: avoid; break-inside: avoid;
-    }
-    .inv-terms { page-break-before: auto; }
   }
 
   .invoice-wrap { font-family: 'DM Sans', sans-serif; color: #1a1714; font-size: 12px; line-height: 1.5; }
@@ -294,73 +264,13 @@
   .inv-footer { text-align: center; margin-top: 10px; font-size: 10px; color: #888; border-top: 1px solid #e0dbd0; padding-top: 8px; }
   .inv-amount-words { font-size: 11px; color: #444; font-style: italic; margin-top: 4px; }
 
-  /* ═══════ RESPONSIVE / MOBILE ═══════ */
-  @media (max-width: 768px) {
-    .app-body { padding: 14px; }
-    .app-header { padding: 0 14px; }
-    .app-header .brand { font-size: 17px; }
-    .stats-grid { grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; }
-    .stat-card { padding: 12px; }
-    .stat-card .s-val { font-size: 22px; }
-    .topbar { flex-direction: column; align-items: stretch; }
-    .topbar .nav-btns { justify-content: space-between; }
-    .topbar > div[style*="display:flex"] { width: 100%; }
+  @media (max-width: 600px) {
+    .app-body { padding: 12px; }
+    .app-header { padding: 0 12px; }
+    .topbar { flex-direction: column; align-items: flex-start; }
     .form-row { grid-template-columns: 1fr; }
     .currency-rate-grid { grid-template-columns: 1fr; }
     .add-user-row { grid-template-columns: 1fr; }
-    .add-user-row .table-action, .add-user-row button { width: 100%; }
-    .modal-box { padding: 1.25rem; max-height: 96vh; border-radius: var(--radius-sm); }
-    .modal-actions { flex-direction: column-reverse; }
-    .modal-actions .btn-sm { width: 100%; padding: 12px; }
-    .payment-methods { gap: 6px; }
-    .pay-btn { min-width: 80px; font-size: 12px; padding: 8px 6px; }
-    .bk-grid { grid-template-columns: 1fr; }
-    .user-table-wrap, .admin-section { overflow-x: auto; }
-    .user-table { min-width: 480px; }
-    .add-user-row { align-items: stretch; }
-    .rate-field input, .rate-field select, .filter-bar select, .audit-filter-bar select, .add-user-row input, .add-user-row select { font-size: 16px; }
-  }
-
-  @media (max-width: 480px) {
-    .login-container { max-width: 100%; }
-    .login-card { padding: 1.25rem; }
-    .login-brand h1 { font-size: 2.1rem; }
-    .app-header { height: auto; min-height: 56px; padding: 8px 10px; }
-    .app-header .brand { font-size: 15px; gap: 6px; }
-    .app-header .brand svg { width: 26px; height: 26px; flex-shrink: 0; }
-    .header-right { gap: 6px; }
-    .user-badge span#user-name-display { display: none; }
-    .user-badge { padding: 5px 8px; }
-    .logout-btn { padding: 6px 10px; font-size: 12px; }
-    .app-body { padding: 10px; }
-    .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
-    .tabs { width: 100%; overflow-x: auto; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; }
-    .tab-btn { padding: 8px 12px; font-size: 13px; white-space: nowrap; }
-    .month-title { font-size: 16px; }
-    .add-btn, .export-btn { padding: 9px 14px; font-size: 13px; flex: 1; justify-content: center; }
-    .topbar > div[style*="display:flex"] { flex-wrap: nowrap; }
-    .cal-wrap { border-radius: var(--radius-sm); }
-    .cal-table th, .cal-table td { padding: 3px 4px; font-size: 12px; }
-    .modal-header h3 { font-size: 17px; }
-    .form-section-title { font-size: 10px; margin: 12px 0 8px; }
-    .currency-panel { padding: 10px; }
-  }
-
-  /* Invoice preview readability on small screens (screen only, not print) */
-  @media (max-width: 700px) {
-    #invoice-modal .modal-box { max-width: 100%; padding: 1rem; }
-    .modal-header.no-print { flex-direction: column; align-items: stretch; gap: 10px; }
-    .modal-header.no-print > div { display: flex; gap: 8px; }
-    .modal-header.no-print .btn-sm { flex: 1; }
-    .inv-header { flex-direction: column; align-items: flex-start; gap: 12px; }
-    .inv-title-block { text-align: left; }
-    .inv-grid, .inv-grid-3 { grid-template-columns: 1fr 1fr; }
-    .inv-sign-grid { grid-template-columns: 1fr; gap: 24px; }
-    .inv-charges-table { display: block; overflow-x: auto; white-space: nowrap; }
-  }
-
-  @media (max-width: 420px) {
-    .inv-grid, .inv-grid-3 { grid-template-columns: 1fr; }
   }
 </style>
 </head>
@@ -428,7 +338,6 @@
       <button class="tab-btn active" onclick="switchTab('calendar', this)">📅 Calendar</button>
       <button class="tab-btn" onclick="switchTab('bookings', this)">📋 All Bookings</button>
       <button class="tab-btn admin-only-tab" onclick="switchTab('admin', this)" style="display:none;">⚙️ Admin</button>
-      <button class="tab-btn admin-only-tab" onclick="switchTab('accounts', this)" style="display:none;">💼 Accounts</button>
     </div>
 
 
@@ -477,11 +386,6 @@
     <div id="tab-admin" style="display:none;">
       <div id="admin-content"></div>
     </div>
-
-    <!-- Accounts Tab (Admin only) -->
-    <div id="tab-accounts" style="display:none;">
-      <div id="accounts-content"></div>
-    </div>
   </div>
 </div>
 
@@ -522,10 +426,8 @@
 
     <div class="form-section-title">Booking Details</div>
     <div class="form-group">
-      <label>Room</label>
-      <select id="f-room">
-        <option value="">Select a room</option>
-      </select>
+      <label>Room(s) <span id="f-room-count" style="font-weight:400;color:#888;"></span></label>
+      <div id="f-room-checks" style="display:flex;flex-direction:column;gap:6px;border:1px solid #ddd;border-radius:8px;padding:8px 10px;max-height:160px;overflow-y:auto;"></div>
     </div>
     <div class="form-row">
       <div class="form-group">
@@ -580,20 +482,13 @@
 
     <div class="form-section-title">💰 Pricing &amp; Currency</div>
     <div class="currency-panel">
-      <div class="currency-panel-title">💱 Guest Type &amp; Pricing</div>
-      <div class="form-group" style="margin-bottom:12px;">
-        <label>Guest Type</label>
-        <select id="f-guest-type" onchange="onGuestTypeChange()">
-          <option value="foreign">🌍 Foreign Guest (needs conversion rate)</option>
-          <option value="local">🇱🇰 Local Guest (LKR only, no conversion)</option>
-        </select>
-      </div>
+      <div class="currency-panel-title">💱 Currency &amp; Conversion Rate</div>
       <div class="currency-rate-grid">
         <div class="rate-field">
-          <label id="price-field-label">Rate / Night (USD $)</label>
+          <label>Rate / Night (USD $)</label>
           <input type="number" id="f-price-usd" placeholder="0.00" min="0" step="0.01" oninput="recalcFromUSD()" />
         </div>
-        <div class="rate-field" id="guest-currency-field">
+        <div class="rate-field">
           <label>Guest Currency</label>
           <select id="f-currency" onchange="onCurrencyChange()">
             <option value="LKR" data-rate="320">🇱🇰 LKR – Sri Lankan Rupee</option>
@@ -618,7 +513,7 @@
             <option value="DKK" data-rate="6.9">🇩🇰 DKK – Danish Krone</option>
           </select>
         </div>
-        <div class="rate-field" id="exchange-rate-field">
+        <div class="rate-field">
           <label>Exchange Rate (1 USD =)</label>
           <input type="number" id="f-rate" placeholder="320" min="0.01" step="0.01" oninput="recalcFromRate()" />
         </div>
@@ -660,8 +555,7 @@
     <div class="modal-header no-print">
       <h3>Guest Registration &amp; Invoice</h3>
       <div style="display:flex;gap:8px;">
-        <button class="btn-sm primary" id="download-pdf-btn" onclick="downloadInvoicePDF()">📥 Download PDF</button>
-        <button class="btn-sm" onclick="printInvoice()">🖨️ Print</button>
+        <button class="btn-sm primary" onclick="printInvoice()">🖨️ Print / Save as PDF</button>
         <button class="modal-close" onclick="closeInvoice()">✕</button>
       </div>
     </div>
@@ -744,14 +638,15 @@
 // ═══════════════════════════════════════════════════════
 //  FIREBASE (cloud sync — replaces localStorage as source of truth)
 // ═══════════════════════════════════════════════════════
+// TODO: paste your firebaseConfig object from Firebase Console →
+// Project settings → General → Your apps → Web app.
 const firebaseConfig = {
-  apiKey: "AIzaSyDwMtoamAUg8tqn9G8I7PiczG-5NudI_RY",
-  authDomain: "crystal-villa-booking.firebaseapp.com",
-  projectId: "crystal-villa-booking",
-  storageBucket: "crystal-villa-booking.firebasestorage.app",
-  messagingSenderId: "617007863904",
-  appId: "1:617007863904:web:1a23bd218d38f5fb38cb05",
-  measurementId: "G-2KJXVFVPHR"
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_PROJECT_ID.appspot.com",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId: "YOUR_APP_ID"
 };
 
 firebase.initializeApp(firebaseConfig);
@@ -762,15 +657,13 @@ let lastSyncIso = null;
 let persistTimer = null;
 let suppressNextSnapshot = false; // avoids a flicker right after our own write
 
-const EMPTY_STATE = { bookings: [], extraUsers: {}, auditLog: [], invoiceCounter: 0, invoiceLogo: null, accountsRate: 320 };
-let accountsRate = 320;
+const EMPTY_STATE = { bookings: [], extraUsers: {}, auditLog: [], invoiceCounter: 0, invoiceLogo: null };
 
 function applyStateToLocal(d) {
   bookings = Array.isArray(d.bookings) ? d.bookings : [];
   extraUsers = d.extraUsers || {};
   auditLog = Array.isArray(d.auditLog) ? d.auditLog : [];
   invoiceCounter = d.invoiceCounter || 0;
-  accountsRate = parseFloat(d.accountsRate) || 320;
   if (d.invoiceLogo) localStorage.setItem('cvInvoiceLogo', d.invoiceLogo);
   else localStorage.removeItem('cvInvoiceLogo');
 }
@@ -789,7 +682,7 @@ async function loadData() {
   } catch (e) {
     console.error('Firebase load failed:', e);
     alert('Could not load data from Firebase. Check your internet connection or the firebaseConfig values in the code.');
-    bookings = []; extraUsers = {}; auditLog = []; invoiceCounter = 0; accountsRate = 320;
+    bookings = []; extraUsers = {}; auditLog = []; invoiceCounter = 0;
   }
 }
 
@@ -799,7 +692,7 @@ function persistState() {
   persistTimer = setTimeout(async () => {
     try {
       const payload = {
-        bookings, extraUsers, auditLog, invoiceCounter, accountsRate,
+        bookings, extraUsers, auditLog, invoiceCounter,
         invoiceLogo: localStorage.getItem('cvInvoiceLogo') || null,
       };
       suppressNextSnapshot = true;
@@ -822,7 +715,6 @@ function setupRealtimeSync() {
     renderCalendar(); renderStats();
     if (document.getElementById('tab-bookings').style.display !== 'none') renderBookingList();
     if (document.getElementById('tab-admin').style.display !== 'none') renderAdminPanel();
-    if (document.getElementById('tab-accounts').style.display !== 'none') renderAccountsPanel();
   }, err => console.error('Firebase realtime error:', err));
 }
 setupRealtimeSync();
@@ -832,7 +724,6 @@ function syncNow() {
     renderCalendar(); renderStats();
     if (document.getElementById('tab-bookings').style.display !== 'none') renderBookingList();
     if (document.getElementById('tab-admin').style.display !== 'none') renderAdminPanel();
-    if (document.getElementById('tab-accounts').style.display !== 'none') renderAccountsPanel();
   });
 }
 
@@ -869,20 +760,11 @@ let invoiceCounter = 0; // persisted
 // ═══════════════════════════════════════════════════════
 //  STORAGE
 // ═══════════════════════════════════════════════════════
-// loadData() now lives in the FIREBASE section above — it pulls from the cloud instead of localStorage.
+// loadData() now lives in the SUPABASE section above — it pulls from the cloud instead of localStorage.
 function saveBookings() { persistState(); }
 function saveAuditLog() { persistState(); }
 function saveExtraUsers() { persistState(); }
 function saveInvoiceCounter() { persistState(); }
-function saveAccountsRate() {
-  if (!isAdmin()) return;
-  const v = parseFloat(document.getElementById('accounts-rate-input').value);
-  if (!v || v <= 0) { alert('Please enter a valid rate.'); return; }
-  accountsRate = v;
-  addAudit('set_accounts_rate', `Updated Accounts reference rate to 1 USD = ${v} LKR`, '💱');
-  persistState();
-  renderAccountsPanel();
-}
 function saveSession(u) { localStorage.setItem('cvSession', u); }
 function loadSession() { return localStorage.getItem('cvSession'); }
 function clearSession() { localStorage.removeItem('cvSession'); }
@@ -1002,10 +884,8 @@ function switchTab(tab, btn) {
   document.getElementById('tab-calendar').style.display = tab === 'calendar' ? '' : 'none';
   document.getElementById('tab-bookings').style.display = tab === 'bookings' ? '' : 'none';
   document.getElementById('tab-admin').style.display = tab === 'admin' ? '' : 'none';
-  document.getElementById('tab-accounts').style.display = tab === 'accounts' ? '' : 'none';
   if (tab === 'bookings') renderBookingList();
   if (tab === 'admin') renderAdminPanel();
-  if (tab === 'accounts') renderAccountsPanel();
 }
 
 // ═══════════════════════════════════════════════════════
@@ -1016,16 +896,13 @@ function renderStats() {
   const active = bookings.filter(b => b.checkIn <= today && b.checkOut > today).length;
   const upcoming = bookings.filter(b => b.checkIn > today).length;
   const m = `${calYear}-${pad(calMonth+1)}`;
-  const monthBookings = bookings.filter(b => b.checkIn.startsWith(m));
-  const revLKR = monthBookings.filter(b => b.guestType === 'local').reduce((s,b) => s + (parseFloat(b.price)||0) * daysBetween(b.checkIn, b.checkOut), 0);
-  const revUSD = monthBookings.filter(b => b.guestType !== 'local').reduce((s,b) => s + (parseFloat(b.price)||0) * daysBetween(b.checkIn, b.checkOut), 0);
-  const totalNights = monthBookings.reduce((s,b) => s + daysBetween(b.checkIn, b.checkOut), 0);
+  const rev = bookings.filter(b => b.checkIn.startsWith(m)).reduce((s,b) => s + (parseFloat(b.price)||0) * daysBetween(b.checkIn, b.checkOut), 0);
+  const totalNights = bookings.filter(b => b.checkIn.startsWith(m)).reduce((s,b) => s + daysBetween(b.checkIn, b.checkOut), 0);
   document.getElementById('stats-grid').innerHTML = `
     <div class="stat-card"><div class="s-label">Rooms</div><div class="s-val">5</div><div class="s-sub">2 bungalow · 1 double · 2 triple</div></div>
     <div class="stat-card"><div class="s-label">Currently active</div><div class="s-val">${active}</div><div class="s-sub">guests checked in</div></div>
     <div class="stat-card"><div class="s-label">Upcoming</div><div class="s-val">${upcoming}</div><div class="s-sub">future bookings</div></div>
-    <div class="stat-card"><div class="s-label">${MONTHS[calMonth]} revenue (Local)</div><div class="s-val">Rs ${Math.round(revLKR).toLocaleString()}</div><div class="s-sub">${totalNights} nights booked</div></div>
-    <div class="stat-card"><div class="s-label">${MONTHS[calMonth]} revenue (Foreign)</div><div class="s-val">$${Math.round(revUSD).toLocaleString()}</div><div class="s-sub">${totalNights} nights booked</div></div>
+    <div class="stat-card"><div class="s-label">${MONTHS[calMonth]} revenue</div><div class="s-val">$${Math.round(rev).toLocaleString()}</div><div class="s-sub">${totalNights} nights booked</div></div>
   `;
 }
 
@@ -1102,8 +979,8 @@ function renderBookingList() {
       </div>
       <div class="bk-footer">
         <div>
-          <div class="price-tag">${b.guestType==='local'?'Rs ':'$'}${total.toLocaleString(undefined,{maximumFractionDigits:2})}</div>
-          <div style="font-size:11px;color:var(--text3);">${b.guestType==='local'?'Rs ':'$'}${(parseFloat(b.price)||0).toFixed(2)}/night × ${nights}</div>
+          <div class="price-tag">$${total.toLocaleString(undefined,{maximumFractionDigits:2})}</div>
+          <div style="font-size:11px;color:var(--text3);">$${(parseFloat(b.price)||0).toFixed(2)}/night × ${nights}</div>
         </div>
         <div class="card-actions">
           <button class="icon-action" title="Print Invoice" onclick="openInvoiceById('${b.id}')">🖨️</button>
@@ -1181,19 +1058,6 @@ function renderAdminPanel() {
       </div>
     </div>`).join('') || '<div style="color:var(--text3);padding:20px;text-align:center;">No activity logged yet</div>';
 
-  const accountsRateSection = `
-    <div class="admin-section">
-      <h4>💼 Accounts Settings</h4>
-      <div class="form-group" style="max-width:320px;">
-        <label style="color:var(--text2);font-size:12px;text-transform:none;letter-spacing:normal;font-weight:700;display:block;margin-bottom:6px;">Reference USD → LKR Rate (used for Accounts reporting)</label>
-        <input type="number" id="accounts-rate-input" min="0.01" step="0.01" value="${accountsRate}" style="width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:8px;background:var(--bg);font-size:15px;" />
-      </div>
-      <div class="modal-actions" style="justify-content:flex-start;">
-        <button class="btn-sm primary" onclick="saveAccountsRate()">Save Rate</button>
-      </div>
-      <div style="font-size:12px;color:var(--text3);margin-top:10px;">Used to show dual LKR/USD totals in the Accounts tab, regardless of each booking's own guest currency.</div>
-    </div>`;
-
   document.getElementById('admin-content').innerHTML = `
     <!-- USER MANAGEMENT -->
     <div class="admin-section">
@@ -1208,8 +1072,6 @@ function renderAdminPanel() {
     </div>
 
     ${logoSection}
-
-    ${accountsRateSection}
 
     <!-- AUDIT LOG -->
     <div class="admin-section">
@@ -1342,208 +1204,13 @@ function clearInvoiceLogo() {
 }
 
 // ═══════════════════════════════════════════════════════
-//  ACCOUNTS PANEL (Admin only)
-// ═══════════════════════════════════════════════════════
-function renderAccountsPanel() {
-  if (!isAdmin()) {
-    document.getElementById('accounts-content').innerHTML = `<div class="access-denied">🚫 Access Denied — Admin only</div>`;
-    return;
-  }
-  const m = `${calYear}-${pad(calMonth+1)}`;
-  const monthBookings = bookings.filter(b => b.checkIn.startsWith(m)).sort((a,b) => a.checkIn.localeCompare(b.checkIn));
-
-  let totalGrossLKR = 0, totalGrossUSD = 0;
-  let totalCardFeeLKR = 0, totalCardFeeUSD = 0;
-  let totalNetLKR = 0, totalNetUSD = 0;
-
-  const rows = monthBookings.map(b => {
-    const room = ROOMS.find(r => r.id === b.room) || { name: b.room };
-    const nights = daysBetween(b.checkIn, b.checkOut);
-    const gross = (parseFloat(b.price)||0) * nights;
-    const isLocal = b.guestType === 'local';
-    const cardFee = b.paymentMethod === 'Card' ? gross * 0.025 : 0;
-    const net = gross - cardFee;
-    const vatServiceAmt = gross - (gross / 1.18);
-
-    if (isLocal) { totalGrossLKR += gross; totalCardFeeLKR += cardFee; totalNetLKR += net; }
-    else { totalGrossUSD += gross; totalCardFeeUSD += cardFee; totalNetUSD += net; }
-
-    const grossLKR = isLocal ? gross : gross * accountsRate;
-    const grossUSD = isLocal ? gross / accountsRate : gross;
-    const vatServiceLKR = isLocal ? vatServiceAmt : vatServiceAmt * accountsRate;
-    const vatServiceUSD = isLocal ? vatServiceAmt / accountsRate : vatServiceAmt;
-    const cardFeeLKR = isLocal ? cardFee : cardFee * accountsRate;
-    const cardFeeUSD = isLocal ? cardFee / accountsRate : cardFee;
-    const netLKR = isLocal ? net : net * accountsRate;
-    const netUSD = isLocal ? net / accountsRate : net;
-    const dual = (lkr, usd) => `Rs ${lkr.toLocaleString(undefined,{maximumFractionDigits:2})}<br><span style="color:var(--text3);font-size:11px;">$${usd.toLocaleString(undefined,{maximumFractionDigits:2})}</span>`;
-
-    return `<tr>
-      <td>${b.guestName}</td>
-      <td>${room.name}</td>
-      <td><span class="role-badge ${isLocal?'staff':'admin'}">${isLocal?'Local':'Foreign'}</span></td>
-      <td>${payIcon(b.paymentMethod)} ${b.paymentMethod||'—'}</td>
-      <td style="text-align:right;">${dual(grossLKR, grossUSD)}</td>
-      <td style="text-align:right;color:var(--text3);font-size:12px;">${dual(vatServiceLKR, vatServiceUSD)}</td>
-      <td style="text-align:right;color:var(--text3);font-size:12px;">${cardFee>0 ? dual(cardFeeLKR, cardFeeUSD) : '—'}</td>
-      <td style="text-align:right;font-weight:600;">${dual(netLKR, netUSD)}</td>
-      <td><button class="icon-action" title="Print Accounts Invoice" onclick="openAccountsInvoiceById('${b.id}')">🖨️</button></td>
-    </tr>`;
-  }).join('') || `<tr><td colspan="9" style="text-align:center;color:var(--text3);padding:20px;">No bookings for ${MONTHS[calMonth]} ${calYear}</td></tr>`;
-
-  document.getElementById('accounts-content').innerHTML = `
-    <div class="stats-grid" style="margin-bottom:20px;">
-      <div class="stat-card"><div class="s-label">${MONTHS[calMonth]} Gross Revenue (Local)</div><div class="s-val">Rs ${Math.round(totalGrossLKR).toLocaleString()}</div></div>
-      <div class="stat-card"><div class="s-label">${MONTHS[calMonth]} Gross Revenue (Foreign)</div><div class="s-val">$${Math.round(totalGrossUSD).toLocaleString()}</div></div>
-      <div class="stat-card"><div class="s-label">Card Fees Deducted (2.5%)</div><div class="s-val">Rs ${Math.round(totalCardFeeLKR).toLocaleString()}</div><div class="s-sub">$${totalCardFeeUSD.toFixed(2)} (foreign card fees)</div></div>
-      <div class="stat-card"><div class="s-label">Net to Bank</div><div class="s-val">Rs ${Math.round(totalNetLKR).toLocaleString()}</div><div class="s-sub">$${Math.round(totalNetUSD).toLocaleString()} (foreign)</div></div>
-    </div>
-    <div class="admin-section">
-      <h4>🏦 Bank Deposit Summary — Reference rate 1 USD = ${accountsRate} LKR</h4>
-      <div style="font-size:13px;color:var(--text2);line-height:1.9;">
-        Combined Net to Bank, all in LKR: <strong>Rs ${Math.round(totalNetLKR + totalNetUSD*accountsRate).toLocaleString()}</strong><br>
-        Combined Net to Bank, all in USD: <strong>$${Math.round(totalNetUSD + totalNetLKR/accountsRate).toLocaleString()}</strong><br>
-        <span style="font-size:12px;color:var(--text3);">(Local guest bookings are collected in LKR; foreign guest bookings are collected in USD. This just shows both totals side by side using the reference rate above — set it in Admin → Accounts Settings.)</span>
-      </div>
-    </div>
-    <div class="admin-section">
-      <h4>📊 ${MONTHS[calMonth]} ${calYear} — Booking Breakdown</h4>
-      <div style="font-size:12px;color:var(--text3);margin-bottom:8px;">Amounts shown as LKR (with USD equivalent below) — reference rate 1 USD = ${accountsRate} LKR.</div>
-      <div style="overflow-x:auto;">
-        <table class="user-table">
-          <thead><tr>
-            <th>Guest</th><th>Room</th><th>Type</th><th>Payment</th>
-            <th style="text-align:right;">Gross (LKR / USD)</th>
-            <th style="text-align:right;">VAT/Service (18%)</th>
-            <th style="text-align:right;">Card Fee (2.5%)</th>
-            <th style="text-align:right;">Net to Bank</th>
-            <th>Print</th>
-          </tr></thead>
-          <tbody>${rows}</tbody>
-        </table>
-      </div>
-      <div style="margin-top:14px;">
-        <button class="export-btn" onclick="exportAccountsCSV()">📊 Export Accounts CSV</button>
-      </div>
-    </div>
-  `;
-}
-
-function exportAccountsCSV() {
-  if (!isAdmin()) return;
-  const m = `${calYear}-${pad(calMonth+1)}`;
-  const monthBookings = bookings.filter(b => b.checkIn.startsWith(m)).sort((a,b) => a.checkIn.localeCompare(b.checkIn));
-  const rows = [['Guest Name','Guest Type','Room','Payment Method','Currency','Gross Amount','VAT & Service (18% Incl.)','Card Fee (2.5%)','Net to Bank','Check-in','Check-out']];
-  monthBookings.forEach(b => {
-    const room = ROOMS.find(r => r.id === b.room) || { name: b.room };
-    const nights = daysBetween(b.checkIn, b.checkOut);
-    const gross = (parseFloat(b.price)||0) * nights;
-    const isLocal = b.guestType === 'local';
-    const cardFee = b.paymentMethod === 'Card' ? gross * 0.025 : 0;
-    const net = gross - cardFee;
-    const vatServiceAmt = gross - (gross / 1.18);
-    rows.push([b.guestName, isLocal?'Local':'Foreign', room.name, b.paymentMethod||'', isLocal?'LKR':'USD', gross.toFixed(2), vatServiceAmt.toFixed(2), cardFee.toFixed(2), net.toFixed(2), b.checkIn, b.checkOut]);
-  });
-  const csv = rows.map(r => r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
-  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a'); a.href = url;
-  a.download = `crystal-villa-accounts-${MONTHS[calMonth]}-${calYear}.csv`; a.click();
-  URL.revokeObjectURL(url);
-  addAudit('export', `Exported Accounts CSV for ${MONTHS[calMonth]} ${calYear}`, '📊');
-}
-
-function openAccountsInvoiceById(id) {
-  if (!isAdmin()) { alert('Only admin can view Accounts documents.'); return; }
-  const b = bookings.find(x => x.id === id);
-  if (!b) return;
-  addAudit('print_accounts_invoice', `Printed Accounts invoice for ${b.guestName}`, '🖨️');
-  const room = ROOMS.find(r => r.id === b.room) || { name: b.room, type: '' };
-  const nights = daysBetween(b.checkIn, b.checkOut);
-  const gross = (parseFloat(b.price)||0) * nights;
-  const isLocal = b.guestType === 'local';
-  const sym = isLocal ? 'Rs ' : '$';
-  const cardFee = b.paymentMethod === 'Card' ? gross * 0.025 : 0;
-  const net = gross - cardFee;
-  const vatServiceAmt = gross - (gross / 1.18);
-  const vatBase = gross / 1.18;
-  const grossLKR = isLocal ? gross : gross * accountsRate;
-  const grossUSD = isLocal ? gross / accountsRate : gross;
-  const netLKR = isLocal ? net : net * accountsRate;
-  const netUSD = isLocal ? net / accountsRate : net;
-  const vatBaseLKR = isLocal ? vatBase : vatBase * accountsRate;
-  const vatBaseUSD = isLocal ? vatBase / accountsRate : vatBase;
-  const vatServiceLKR = isLocal ? vatServiceAmt : vatServiceAmt * accountsRate;
-  const vatServiceUSD = isLocal ? vatServiceAmt / accountsRate : vatServiceAmt;
-  const cardFeeLKR = isLocal ? cardFee : cardFee * accountsRate;
-  const cardFeeUSD = isLocal ? cardFee / accountsRate : cardFee;
-  const invNum = b.invNum ? 'CV-' + String(b.invNum).padStart(3,'0') : 'CV-???';
-  const today = new Date().toLocaleDateString('en-GB', { day:'2-digit', month:'long', year:'numeric' });
-
-  const html = `
-<div class="invoice-wrap">
-  <div class="inv-header">
-    <div class="inv-logo-block">
-      <div class="inv-hotel-info">
-        <h2>Crystal Villa — Accounts Department</h2>
-        <p>Internal document — not for guest distribution</p>
-        <p>Galle Matara Road, Palena, Weligama, 81700, Sri Lanka</p>
-      </div>
-    </div>
-    <div class="inv-title-block">
-      <h3>Payment &amp; Bank Deposit Breakdown</h3>
-      <p><strong>Invoice No:</strong> ${invNum}</p>
-      <p><strong>Report Date:</strong> ${today}</p>
-      <p><strong>Prepared by:</strong> ${currentUser ? currentUser.name : '—'}</p>
-    </div>
-  </div>
-
-  <div class="inv-section">
-    <div class="inv-section-title">Booking Information</div>
-    <div class="inv-grid">
-      <div class="inv-field"><label>Guest Name</label><span>${b.guestName}</span></div>
-      <div class="inv-field"><label>Guest Type</label><span>${isLocal ? 'Local (LKR)' : 'Foreign (USD)'}</span></div>
-      <div class="inv-field"><label>Room</label><span>${room.name} (${room.type})</span></div>
-      <div class="inv-field"><label>Check-in / Check-out</label><span>${fmtDate(b.checkIn)} → ${fmtDate(b.checkOut)} (${nights} nights)</span></div>
-      <div class="inv-field"><label>Payment Method</label><span>${payIcon(b.paymentMethod)} ${b.paymentMethod || '—'}</span></div>
-      <div class="inv-field"><label>Added By</label><span>${b.addedBy || '—'}</span></div>
-    </div>
-  </div>
-
-  <div class="inv-section">
-    <div class="inv-section-title">Payment Breakdown — Reference rate: 1 USD = ${accountsRate} LKR</div>
-    <table class="inv-charges-table">
-      <thead><tr><th>Description</th><th style="text-align:right;">LKR</th><th style="text-align:right;">USD</th></tr></thead>
-      <tbody>
-        <tr><td>Gross Guest Payment (Total charged)</td><td style="text-align:right;">Rs ${grossLKR.toLocaleString(undefined,{maximumFractionDigits:2})}</td><td style="text-align:right;">$${grossUSD.toLocaleString(undefined,{maximumFractionDigits:2})}</td></tr>
-        <tr><td style="color:#666;font-size:11px;">— Room Charge (Excl. VAT &amp; Service)</td><td style="text-align:right;color:#666;font-size:11px;">Rs ${vatBaseLKR.toLocaleString(undefined,{maximumFractionDigits:2})}</td><td style="text-align:right;color:#666;font-size:11px;">$${vatBaseUSD.toLocaleString(undefined,{maximumFractionDigits:2})}</td></tr>
-        <tr><td style="color:#666;font-size:11px;">— VAT &amp; Service Charge (18%, Included)</td><td style="text-align:right;color:#666;font-size:11px;">Rs ${vatServiceLKR.toLocaleString(undefined,{maximumFractionDigits:2})}</td><td style="text-align:right;color:#666;font-size:11px;">$${vatServiceUSD.toLocaleString(undefined,{maximumFractionDigits:2})}</td></tr>
-        ${cardFee > 0 ? `<tr><td>Less: Card Processing Fee (2.5%, deducted by bank)</td><td style="text-align:right;color:var(--danger);">– Rs ${cardFeeLKR.toLocaleString(undefined,{maximumFractionDigits:2})}</td><td style="text-align:right;color:var(--danger);">– $${cardFeeUSD.toLocaleString(undefined,{maximumFractionDigits:2})}</td></tr>` : `<tr><td style="color:#666;font-size:11px;">Card Processing Fee</td><td colspan="2" style="text-align:right;color:#666;font-size:11px;">Not applicable (paid by ${b.paymentMethod||'—'})</td></tr>`}
-      </tbody>
-      <tfoot>
-        <tr class="inv-total-row"><td>NET AMOUNT DEPOSITED TO BANK</td><td style="text-align:right;">Rs ${netLKR.toLocaleString(undefined,{maximumFractionDigits:2})}</td><td style="text-align:right;">$${netUSD.toLocaleString(undefined,{maximumFractionDigits:2})}</td></tr>
-      </tfoot>
-    </table>
-    <div style="font-size:11px;color:var(--text3);margin-top:6px;">Native amount actually collected from guest: ${sym}${gross.toLocaleString(undefined,{maximumFractionDigits:2})} (${isLocal?'LKR':'USD'}). LKR/USD columns above are shown side by side using the reference rate for accounts reporting.</div>
-  </div>
-
-  <div class="inv-footer">
-    Crystal Villa · Accounts Department · Internal use only — not to be issued to guests.
-  </div>
-</div>`;
-
-  document.getElementById('print-area').innerHTML = html;
-  document.getElementById('invoice-modal').classList.add('open');
-}
-
-// ═══════════════════════════════════════════════════════
 //  BOOKING MODAL
 // ═══════════════════════════════════════════════════════
 function openModal(prefillDate, prefillRoom) {
   editingId = null;
   document.getElementById('modal-title').textContent = 'New Booking';
   ['f-guest','f-nationality','f-passport','f-phone','f-email','f-notes','f-price','f-price-usd'].forEach(id => document.getElementById(id).value = '');
-  document.getElementById('f-room').value = prefillRoom || '';
+  setSelectedRooms(prefillRoom ? [prefillRoom] : []);
   document.getElementById('f-adults').value = '1';
   document.getElementById('f-children').value = '0';
   document.getElementById('children-ages-wrap').style.display = 'none';
@@ -1552,10 +1219,8 @@ function openModal(prefillDate, prefillRoom) {
   document.getElementById('f-checkout').value = '';
   document.getElementById('f-meal').value = 'RO';
   document.getElementById('f-source').value = 'Direct';
-  document.getElementById('f-guest-type').value = 'foreign';
   document.getElementById('f-currency').value = 'LKR';
   document.getElementById('f-rate').value = '320';
-  onGuestTypeChange();
   document.getElementById('f-payment').value = '';
   document.getElementById('nights-display').style.display = 'none';
   document.getElementById('converted-display').style.display = 'none';
@@ -1583,7 +1248,7 @@ function openEditModal(id) {
   document.getElementById('f-passport').value = b.passport || '';
   document.getElementById('f-phone').value = b.phone || '';
   document.getElementById('f-email').value = b.email || '';
-  document.getElementById('f-room').value = b.room;
+  setSelectedRooms(b.room ? [b.room] : []);
   document.getElementById('f-adults').value = b.adults || '1';
   document.getElementById('f-children').value = b.children || '0';
   document.getElementById('f-checkin').value = b.checkIn;
@@ -1594,8 +1259,6 @@ function openEditModal(id) {
   document.getElementById('f-price-usd').value = b.price;
   document.getElementById('f-currency').value = b.currency || 'LKR';
   document.getElementById('f-rate').value = b.exchangeRate || '320';
-  document.getElementById('f-guest-type').value = b.guestType || ((b.currency === 'LKR' && parseFloat(b.exchangeRate) === 1) ? 'local' : 'foreign');
-  onGuestTypeChange();
   document.getElementById('f-payment').value = b.paymentMethod || '';
   document.getElementById('f-notes').value = b.notes || '';
   document.querySelectorAll('.pay-btn').forEach(btn => btn.classList.remove('selected'));
@@ -1626,41 +1289,42 @@ function updateNights() {
     const n = daysBetween(ci, co);
     const rate = parseFloat(document.getElementById('f-price-usd').value) || parseFloat(document.getElementById('f-price').value) || 0;
     const total = rate * n;
-    const sym = document.getElementById('f-guest-type').value === 'local' ? 'Rs ' : '$';
-    el.innerHTML = `🌙 <strong>${n} night${n!==1?'s':''}</strong>${rate > 0 ? ` &nbsp;·&nbsp; ${sym}${rate.toFixed(2)}/night × ${n} = <strong>${sym}${total.toFixed(2)}</strong>` : ''}`;
+    el.innerHTML = `🌙 <strong>${n} night${n!==1?'s':''}</strong>${rate > 0 ? ` &nbsp;·&nbsp; $${rate.toFixed(2)}/night × ${n} = <strong>$${total.toFixed(2)}</strong>` : ''}`;
     el.style.display = 'block';
   } else { el.style.display = 'none'; }
 }
 
 function saveBooking() {
   const guestName = document.getElementById('f-guest').value.trim();
-  const room = document.getElementById('f-room').value;
+  const rooms = getSelectedRooms();
   const checkIn = document.getElementById('f-checkin').value;
   const checkOut = document.getElementById('f-checkout').value;
   const price = document.getElementById('f-price').value;
 
   if (!guestName) { showFormError('Guest name is required.'); return; }
-  if (!room) { showFormError('Please select a room.'); return; }
+  if (rooms.length === 0) { showFormError('Please select at least one room.'); return; }
+  if (editingId && rooms.length > 1) { showFormError('Please select only one room when editing a booking.'); return; }
   if (!checkIn) { showFormError('Check-in date is required.'); return; }
   if (!checkOut) { showFormError('Check-out date is required.'); return; }
   if (checkOut <= checkIn) { showFormError('Check-out must be after check-in.'); return; }
 
-  const overlap = bookings.find(b => b.room === room && b.id !== editingId && b.checkIn < checkOut && b.checkOut > checkIn);
-  if (overlap) { showFormError(`Room already booked by ${overlap.guestName} (${fmtDate(overlap.checkIn)} – ${fmtDate(overlap.checkOut)}).`); return; }
+  for (const room of rooms) {
+    const overlap = bookings.find(b => b.room === room && b.id !== editingId && b.checkIn < checkOut && b.checkOut > checkIn);
+    if (overlap) { showFormError(`${ROOMS.find(r=>r.id===room)?.name||room} already booked by ${overlap.guestName} (${fmtDate(overlap.checkIn)} – ${fmtDate(overlap.checkOut)}).`); return; }
+  }
 
   const bookingData = {
     guestName, nationality: document.getElementById('f-nationality').value.trim(),
     passport: document.getElementById('f-passport').value.trim(),
     phone: document.getElementById('f-phone').value.trim(),
     email: document.getElementById('f-email').value.trim(),
-    room, checkIn, checkOut,
+    checkIn, checkOut,
     adults: document.getElementById('f-adults').value || '1',
     children: document.getElementById('f-children').value || '0',
     childrenAges: getChildrenAges(),
     mealPlan: document.getElementById('f-meal').value,
     source: document.getElementById('f-source').value,
     price: parseFloat(price) || 0,
-    guestType: document.getElementById('f-guest-type').value,
     currency: document.getElementById('f-currency').value,
     exchangeRate: parseFloat(document.getElementById('f-rate').value) || 320,
     paymentMethod: document.getElementById('f-payment').value,
@@ -1669,15 +1333,17 @@ function saveBooking() {
 
   if (editingId) {
     const idx = bookings.findIndex(b => b.id === editingId);
-    bookings[idx] = { ...bookings[idx], ...bookingData, updatedBy: currentUser.name, updatedAt: new Date().toISOString() };
+    bookings[idx] = { ...bookings[idx], ...bookingData, room: rooms[0], updatedBy: currentUser.name, updatedAt: new Date().toISOString() };
     addAudit('edit_booking', `Edited booking for ${guestName} (${fmtDate(checkIn)} – ${fmtDate(checkOut)})`, '✏️');
   } else {
-    const newId = 'bk_' + Date.now();
-    invoiceCounter++;
-    saveInvoiceCounter();
-    bookings.push({ id: newId, invNum: invoiceCounter, ...bookingData, addedBy: currentUser.name, addedAt: new Date().toISOString() });
-    editingId = newId;
-    addAudit('add_booking', `Added booking for ${guestName} — ${ROOMS.find(r=>r.id===room)?.name||room} (${fmtDate(checkIn)} – ${fmtDate(checkOut)})`, '➕');
+    rooms.forEach(room => {
+      const newId = 'bk_' + Date.now() + '_' + room;
+      invoiceCounter++;
+      saveInvoiceCounter();
+      bookings.push({ id: newId, invNum: invoiceCounter, ...bookingData, room, addedBy: currentUser.name, addedAt: new Date().toISOString() });
+      editingId = newId;
+      addAudit('add_booking', `Added booking for ${guestName} — ${ROOMS.find(r=>r.id===room)?.name||room} (${fmtDate(checkIn)} – ${fmtDate(checkOut)})`, '➕');
+    });
   }
   saveBookings();
   renderCalendar(); renderStats();
@@ -1736,21 +1402,6 @@ function getChildrenAges() {
 // ═══════════════════════════════════════════════════════
 //  CURRENCY HELPERS
 // ═══════════════════════════════════════════════════════
-function onGuestTypeChange() {
-  const isLocal = document.getElementById('f-guest-type').value === 'local';
-  document.getElementById('guest-currency-field').style.display = isLocal ? 'none' : '';
-  document.getElementById('exchange-rate-field').style.display = isLocal ? 'none' : '';
-  document.getElementById('price-field-label').textContent = isLocal ? 'Rate / Night (LKR)' : 'Rate / Night (USD $)';
-  if (isLocal) {
-    document.getElementById('f-currency').value = 'LKR';
-    document.getElementById('f-rate').value = '1';
-    document.getElementById('converted-display').style.display = 'none';
-  } else {
-    if (document.getElementById('f-rate').value === '1') document.getElementById('f-rate').value = '320';
-  }
-  updateNights();
-}
-
 function onCurrencyChange() {
   const sel = document.getElementById('f-currency');
   const opt = sel.options[sel.selectedIndex];
@@ -1840,12 +1491,7 @@ function renderAndShowInvoice(id) {
   const totalUSD = pricePerNight * nights;
   const exchangeRate = parseFloat(b.exchangeRate) || 320;
   const currency = b.currency || 'LKR';
-  const isLocalGuest = b.guestType === 'local';
-  const curLabel = isLocalGuest ? 'LKR' : 'USD';
-  const curSym = isLocalGuest ? 'Rs ' : '$';
   const totalLocal = totalUSD * exchangeRate;
-  const vatServiceAmount = totalUSD - (totalUSD / 1.18);
-  const vatBaseAmount = totalUSD / 1.18;
   const invNum = b.invNum ? 'CV-' + String(b.invNum).padStart(3,'0') : 'CV-???';
   const today = new Date().toLocaleDateString('en-GB', { day:'2-digit', month:'long', year:'numeric' });
   const adults = b.adults || '—';
@@ -1918,47 +1564,43 @@ function renderAndShowInvoice(id) {
           <th>Description</th>
           <th style="text-align:right;">Rate / Night</th>
           <th style="text-align:center;">Nights</th>
-          <th style="text-align:right;">Amount (${curLabel})</th>
+          <th style="text-align:right;">Amount (USD)</th>
         </tr>
       </thead>
       <tbody>
         <tr>
           <td>${room.name} – ${MEAL_LABELS[b.mealPlan] || b.mealPlan || 'Accommodation'}</td>
-          <td style="text-align:right;">${curSym}${pricePerNight.toFixed(2)}</td>
+          <td style="text-align:right;">$${pricePerNight.toFixed(2)}</td>
           <td style="text-align:center;">${nights}</td>
-          <td style="text-align:right;">${curSym}${totalUSD.toFixed(2)}</td>
+          <td style="text-align:right;">$${totalUSD.toFixed(2)}</td>
         </tr>
-        ${(!isLocalGuest && currency !== 'USD') ? `<tr>
+        ${currency !== 'USD' ? `<tr>
           <td colspan="2" style="color:#666;font-size:11px;">Equivalent in ${currency} (Rate: 1 USD = ${exchangeRate})</td>
           <td style="text-align:center;color:#666;font-size:11px;">${nights}</td>
           <td style="text-align:right;color:#666;font-size:11px;">${currency} ${totalLocal.toLocaleString(undefined,{maximumFractionDigits:2})}</td>
         </tr>` : ''}
         <tr>
-          <td colspan="3" style="color:#666;font-size:11px;">Room Charge (Excl. VAT &amp; Service)</td>
-          <td style="text-align:right;color:#666;font-size:11px;">${curSym}${vatBaseAmount.toFixed(2)}</td>
+          <td colspan="3" style="text-align:right;font-weight:600;">Sub Total</td>
+          <td style="text-align:right;font-weight:600;">$${totalUSD.toFixed(2)}</td>
         </tr>
         <tr>
-          <td colspan="3" style="color:#666;font-size:11px;">VAT &amp; Service Charge (18%) — Included</td>
-          <td style="text-align:right;color:#666;font-size:11px;">${curSym}${vatServiceAmount.toFixed(2)}</td>
-        </tr>
-        <tr>
-          <td colspan="3" style="text-align:right;font-weight:600;">Sub Total (Incl. VAT &amp; Service)</td>
-          <td style="text-align:right;font-weight:600;">${curSym}${totalUSD.toFixed(2)}</td>
+          <td colspan="3" style="text-align:right;color:#888;">Tax / Service</td>
+          <td style="text-align:right;color:#888;">Included</td>
         </tr>
       </tbody>
       <tfoot>
         <tr class="inv-total-row">
-          <td colspan="3" style="text-align:right;">TOTAL DUE (${curLabel})</td>
-          <td style="text-align:right;">${curSym}${totalUSD.toFixed(2)}</td>
+          <td colspan="3" style="text-align:right;">TOTAL DUE (USD)</td>
+          <td style="text-align:right;">$${totalUSD.toFixed(2)}</td>
         </tr>
-        ${(!isLocalGuest && currency !== 'USD') ? `<tr class="inv-total-row">
+        ${currency !== 'USD' ? `<tr class="inv-total-row">
           <td colspan="3" style="text-align:right;font-size:11px;">TOTAL IN ${currency}</td>
           <td style="text-align:right;font-size:11px;">${currency} ${totalLocal.toLocaleString(undefined,{maximumFractionDigits:2})}</td>
         </tr>` : ''}
       </tfoot>
     </table>
     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-top:6px;">
-      <div class="inv-amount-words">Amount in words: <em>${numberToWords(Math.round(totalUSD))} ${isLocalGuest ? 'Sri Lankan Rupees' : 'US Dollars'} Only</em></div>
+      <div class="inv-amount-words">Amount in words: <em>${numberToWords(Math.round(totalUSD))} US Dollars Only</em></div>
       ${b.paymentMethod ? `<span style="background:${payBadgeColor(b.paymentMethod).bg};color:${payBadgeColor(b.paymentMethod).text};border-radius:4px;padding:3px 12px;font-size:12px;font-weight:700;">${payIcon(b.paymentMethod)} ${b.paymentMethod}</span>` : ''}
     </div>
   </div>
@@ -2002,60 +1644,10 @@ function renderAndShowInvoice(id) {
 
   document.getElementById('print-area').innerHTML = html;
   document.getElementById('invoice-modal').classList.add('open');
-  currentInvoiceId = id;
 }
 
-function closeInvoice() { document.getElementById('invoice-modal').classList.remove('open'); currentInvoiceId = null; }
+function closeInvoice() { document.getElementById('invoice-modal').classList.remove('open'); }
 function printInvoice() { window.print(); }
-
-// ═══════════════════════════════════════════════════════
-//  DOWNLOAD INVOICE AS PDF (works on mobile, unlike relying
-//  solely on window.print() which many mobile browsers /
-//  in-app webviews don't handle well)
-// ═══════════════════════════════════════════════════════
-let currentInvoiceId = null;
-function downloadInvoicePDF() {
-  const el = document.getElementById('print-area');
-  if (!el || !el.innerHTML.trim()) return;
-  const b = bookings.find(x => x.id === currentInvoiceId);
-  const invNum = (b && b.invNum) ? 'CV-' + String(b.invNum).padStart(3, '0') : 'invoice';
-  const guestPart = b ? b.guestName.replace(/[^a-z0-9]+/gi, '-').replace(/^-+|-+$/g, '') : 'guest';
-  const filename = `${invNum}-${guestPart}.pdf`;
-
-  const btn = document.getElementById('download-pdf-btn');
-  const originalLabel = btn.innerHTML;
-  btn.disabled = true;
-  btn.innerHTML = '⏳ Generating...';
-
-  const opt = {
-    margin: [8, 8, 8, 8],
-    filename: filename,
-    image: { type: 'jpeg', quality: 0.98 },
-    html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff', windowWidth: 800 },
-    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-    pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
-  };
-
-  if (typeof html2pdf === 'undefined') {
-    // Fallback if the PDF library failed to load (e.g. offline) — use print dialog instead
-    btn.disabled = false;
-    btn.innerHTML = originalLabel;
-    alert('PDF library could not load (check your internet connection). Opening print dialog instead — choose "Save as PDF" there.');
-    window.print();
-    return;
-  }
-
-  html2pdf().set(opt).from(el).save().then(() => {
-    btn.disabled = false;
-    btn.innerHTML = originalLabel;
-    addAudit('download_invoice', `Downloaded PDF invoice for ${b ? b.guestName : ''}`, '📥');
-  }).catch(err => {
-    console.error('PDF generation failed:', err);
-    btn.disabled = false;
-    btn.innerHTML = originalLabel;
-    alert('Could not generate the PDF. Please try the Print button instead.');
-  });
-}
 
 // ═══════════════════════════════════════════════════════
 //  NUMBER TO WORDS
@@ -2078,14 +1670,14 @@ function numberToWords(num) {
 //  EXPORT
 // ═══════════════════════════════════════════════════════
 function exportExcel() {
-  const rows = [['Invoice#','Guest Name','Guest Type','Nationality','Passport/NIC','Phone','Email','Room','Room Type','Check-in','Check-out','Nights','Adults','Children','Meal Plan','Source','Rate/Night','Total','Currency','Exch Rate','Total Local','Payment Method','Notes','Status','Added By','Added Date']];
+  const rows = [['Invoice#','Guest Name','Nationality','Passport/NIC','Phone','Email','Room','Room Type','Check-in','Check-out','Nights','Adults','Children','Meal Plan','Source','Rate/Night (USD)','Total USD','Currency','Exch Rate','Total Local','Payment Method','Notes','Status','Added By','Added Date']];
   bookings.sort((a,b) => a.checkIn.localeCompare(b.checkIn)).forEach(b => {
     const room = ROOMS.find(r => r.id === b.room) || { name: b.room, type: '' };
     const nights = daysBetween(b.checkIn, b.checkOut);
     const totalUSD = (parseFloat(b.price)||0) * nights;
     const totalLocal = totalUSD * (parseFloat(b.exchangeRate)||320);
     const invNum = b.invNum ? 'CV-'+String(b.invNum).padStart(3,'0') : '';
-    rows.push([invNum, b.guestName, b.guestType==='local'?'Local':'Foreign', b.nationality||'', b.passport||'', b.phone||'', b.email||'', room.name, room.type, b.checkIn, b.checkOut, nights, b.adults||'', b.children||'', b.mealPlan||'', b.source||'', b.price, totalUSD.toFixed(2), b.currency||'LKR', b.exchangeRate||320, totalLocal.toFixed(2), b.paymentMethod||'', b.notes||'', getStatus(b), b.addedBy||'', (b.addedAt||'').split('T')[0]]);
+    rows.push([invNum, b.guestName, b.nationality||'', b.passport||'', b.phone||'', b.email||'', room.name, room.type, b.checkIn, b.checkOut, nights, b.adults||'', b.children||'', b.mealPlan||'', b.source||'', b.price, totalUSD.toFixed(2), b.currency||'LKR', b.exchangeRate||320, totalLocal.toFixed(2), b.paymentMethod||'', b.notes||'', getStatus(b), b.addedBy||'', (b.addedAt||'').split('T')[0]]);
   });
   const csv = rows.map(r => r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
   const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
@@ -2110,17 +1702,32 @@ function exportAuditLog() {
 //  HELPERS
 // ═══════════════════════════════════════════════════════
 function populateSelects() {
-  const roomSel = document.getElementById('f-room');
+  const roomChecks = document.getElementById('f-room-checks');
   const filterSel = document.getElementById('filter-room');
   // Clear existing options except first
-  while (roomSel.options.length > 1) roomSel.remove(1);
   while (filterSel.options.length > 1) filterSel.remove(1);
+  roomChecks.innerHTML = '';
   ROOMS.forEach(r => {
-    [roomSel, filterSel].forEach(sel => {
-      const opt = document.createElement('option');
-      opt.value = r.id; opt.textContent = `${r.name} (${r.type})`; sel.appendChild(opt);
-    });
+    const opt = document.createElement('option');
+    opt.value = r.id; opt.textContent = `${r.name} (${r.type})`; filterSel.appendChild(opt);
+
+    const lbl = document.createElement('label');
+    lbl.style.cssText = 'display:flex;align-items:center;gap:8px;font-weight:400;cursor:pointer;';
+    lbl.innerHTML = `<input type="checkbox" value="${r.id}" onchange="updateRoomCount()"> ${r.name} (${r.type})`;
+    roomChecks.appendChild(lbl);
   });
+}
+function getSelectedRooms() {
+  return Array.from(document.querySelectorAll('#f-room-checks input[type=checkbox]:checked')).map(cb => cb.value);
+}
+function setSelectedRooms(ids) {
+  document.querySelectorAll('#f-room-checks input[type=checkbox]').forEach(cb => { cb.checked = ids.includes(cb.value); });
+  updateRoomCount();
+}
+function updateRoomCount() {
+  const n = getSelectedRooms().length;
+  const el = document.getElementById('f-room-count');
+  if (el) el.textContent = n ? `(${n} room${n !== 1 ? 's' : ''} selected)` : '';
 }
 function todayStr() { const d = new Date(); return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; }
 function daysInMonth(y, m) { return new Date(y, m+1, 0).getDate(); }
@@ -2193,7 +1800,7 @@ function confirmCancelBooking() {
   document.getElementById('inp-password').addEventListener('keydown', e => { if (e.key==='Enter') loginWithPassword(); });
   document.getElementById('inp-username').addEventListener('keydown', e => { if (e.key==='Enter') document.getElementById('inp-password').focus(); });
   loadSavedCredentials();
-  // Load extraUsers/bookings/etc from Firebase up front so login works for non-builtin accounts too.
+  // Load extraUsers/bookings/etc from Supabase up front so login works for non-builtin accounts too.
   await loadData();
   const saved = loadSession();
   if (saved) {
