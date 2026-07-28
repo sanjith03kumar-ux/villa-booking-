@@ -7,6 +7,8 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
   :root {
     --bg: #f7f5f0;
@@ -172,6 +174,9 @@
   .pay-btn { flex: 1; min-width: 90px; padding: 8px 10px; border: 2px solid var(--border); border-radius: var(--radius-sm); background: white; color: #1a1714; font-size: 13px; font-weight: 500; font-family: 'DM Sans', sans-serif; cursor: pointer; text-align: center; transition: all 0.15s; }
   .pay-btn:hover { border-color: #1a4f8b; background: #f0f4ff; }
   .pay-btn.selected { border-color: #1a4f8b; background: #1a4f8b; color: white; }
+  .guest-type-btn { flex: 1; min-width: 90px; padding: 8px 10px; border: 2px solid var(--border); border-radius: var(--radius-sm); background: white; color: #1a1714; font-size: 13px; font-weight: 500; font-family: 'DM Sans', sans-serif; cursor: pointer; text-align: center; transition: all 0.15s; }
+  .guest-type-btn:hover { border-color: #2c5f3f; background: #f0f8f2; }
+  .guest-type-btn.selected { border-color: #2c5f3f; background: #2c5f3f; color: white; }
 
   /* STATUS BADGES */
   .pay-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; padding: 2px 8px; border-radius: 10px; font-weight: 500; }
@@ -183,6 +188,12 @@
   /* FORM GRID */
   .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   .form-section-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text3); border-bottom: 1px solid var(--border); padding-bottom: 6px; margin: 16px 0 10px; }
+  .room-select-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .room-chip { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border: 1.5px solid var(--border); border-radius: 10px; cursor: pointer; background: var(--bg); transition: border-color 0.15s, background 0.15s; margin-bottom: 0; text-transform: none; font-weight: 400; letter-spacing: normal; color: var(--text); }
+  .room-chip input { width: 16px; height: 16px; flex-shrink: 0; cursor: pointer; }
+  .room-chip .room-chip-name { font-size: 13px; font-weight: 600; text-transform: none; }
+  .room-chip .room-chip-type { display: block; font-size: 11px; font-weight: 400; color: var(--text3); text-transform: none; }
+  .room-chip.selected { border-color: var(--accent); background: rgba(44,95,63,0.08); }
 
   /* EXPORT */
   .export-btn { padding: 8px 16px; background: var(--gold-light); color: var(--gold); border: 1px solid #f0d9a8; border-radius: var(--radius-sm); font-size: 13px; font-weight: 500; font-family: 'DM Sans', sans-serif; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.15s; }
@@ -226,49 +237,55 @@
   /* INVOICE PRINT */
   #invoice-modal .modal-box { max-width: 800px; }
   @media print {
+    @page { size: A4; margin: 10mm; }
+    html, body { height: auto; }
     body * { visibility: hidden; }
-    #print-area, #print-area * { visibility: visible; }
-    #print-area { position: fixed; top: 0; left: 0; width: 100%; padding: 20px; margin: 0; background: white; }
+    #print-area, #print-area * { visibility: visible; -webkit-print-color-adjust: exact; print-color-adjust: exact; color-adjust: exact; }
+    #print-area { position: fixed; top: 0; left: 0; width: 100%; padding: 0; margin: 0; background: white; }
+    .invoice-wrap { transform-origin: top left; }
+    .inv-section, .inv-terms, .inv-sign-grid, .inv-header { page-break-inside: avoid; }
     .no-print { display: none !important; }
   }
 
-  .invoice-wrap { font-family: 'DM Sans', sans-serif; color: #1a1714; font-size: 12px; line-height: 1.5; }
-  .inv-header { display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid #1a4f8b; padding-bottom: 14px; margin-bottom: 14px; }
+  .invoice-wrap { font-family: 'DM Sans', sans-serif; color: #1a1714; font-size: 11.5px; line-height: 1.4; max-width: 720px; margin: 0 auto; }
+  .inv-header { display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid #1a4f8b; padding-bottom: 10px; margin-bottom: 10px; }
   .inv-logo-block { display: flex; align-items: center; gap: 12px; }
-  .inv-logo-circle { width: 72px; height: 72px; border-radius: 50%; background: #1a4f8b; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-  .inv-logo-circle svg { width: 48px; height: 48px; }
-  .inv-hotel-info h2 { font-family: 'DM Serif Display', serif; font-size: 18px; color: #1a4f8b; margin-bottom: 2px; }
-  .inv-hotel-info p { font-size: 11px; color: #444; margin: 1px 0; }
+  .inv-logo-circle { width: 62px; height: 62px; border-radius: 50%; background: #1a4f8b; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .inv-logo-circle svg { width: 42px; height: 42px; }
+  .inv-hotel-info h2 { font-family: 'DM Serif Display', serif; font-size: 17px; color: #1a4f8b; margin-bottom: 2px; }
+  .inv-hotel-info p { font-size: 10.5px; color: #444; margin: 1px 0; }
   .inv-title-block { text-align: right; }
-  .inv-title-block h3 { font-family: 'DM Serif Display', serif; font-size: 22px; color: #1a4f8b; margin-bottom: 4px; }
-  .inv-title-block p { font-size: 11px; color: #666; }
-  .inv-section { margin-bottom: 12px; }
-  .inv-section-title { background: #1a4f8b; color: white; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; padding: 4px 10px; border-radius: 4px; margin-bottom: 8px; }
-  .inv-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 20px; }
-  .inv-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px 20px; }
+  .inv-title-block h3 { font-family: 'DM Serif Display', serif; font-size: 19px; color: #1a4f8b; margin-bottom: 3px; }
+  .inv-title-block p { font-size: 10.5px; color: #666; margin: 1px 0; }
+  .inv-section { margin-bottom: 9px; }
+  .inv-section-title { background: #1a4f8b; color: white; font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; padding: 4px 10px; border-radius: 4px; margin-bottom: 6px; }
+  .inv-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px 20px; }
+  .inv-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px 20px; }
   .inv-field { display: flex; flex-direction: column; gap: 1px; }
-  .inv-field label { font-size: 10px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 0.04em; }
-  .inv-field span { font-size: 12px; color: #1a1714; font-weight: 500; border-bottom: 1px solid #ddd; padding-bottom: 2px; min-height: 18px; }
-  .inv-charges-table { width: 100%; border-collapse: collapse; margin-bottom: 8px; }
-  .inv-charges-table th { background: #f0ede6; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; padding: 5px 8px; border: 1px solid #ddd; text-align: left; }
-  .inv-charges-table td { padding: 5px 8px; border: 1px solid #ddd; font-size: 12px; }
-  .inv-total-row td { background: #e8f0f8; font-weight: 700; color: #1a4f8b; font-size: 13px; }
-  .inv-sign-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 8px; }
+  .inv-field label { font-size: 9.5px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 0.04em; }
+  .inv-field span { font-size: 11.5px; color: #1a1714; font-weight: 500; border-bottom: 1px solid #ddd; padding-bottom: 2px; min-height: 16px; }
+  .inv-charges-table { width: 100%; border-collapse: collapse; margin-bottom: 6px; }
+  .inv-charges-table th { background: #f0ede6; font-size: 9.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; padding: 4px 8px; border: 1px solid #ddd; text-align: left; }
+  .inv-charges-table td { padding: 4px 8px; border: 1px solid #ddd; font-size: 11.5px; }
+  .inv-total-row td { background: #e8f0f8; font-weight: 700; color: #1a4f8b; font-size: 12px; }
+  .inv-sign-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 6px; }
   .inv-sign-box { border-top: 1px solid #999; padding-top: 4px; }
-  .inv-sign-box label { font-size: 10px; font-weight: 700; color: #666; text-transform: uppercase; }
-  .inv-sign-space { height: 48px; }
-  .inv-terms { background: #f7f5f0; border: 1px solid #e0dbd0; border-radius: 4px; padding: 8px 12px; margin-top: 10px; }
-  .inv-terms h4 { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #1a4f8b; margin-bottom: 4px; }
+  .inv-sign-box label { font-size: 9.5px; font-weight: 700; color: #666; text-transform: uppercase; }
+  .inv-sign-space { height: 34px; }
+  .inv-terms { background: #f7f5f0; border: 1px solid #e0dbd0; border-radius: 4px; padding: 6px 12px; margin-top: 8px; }
+  .inv-terms h4 { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #1a4f8b; margin-bottom: 3px; }
   .inv-terms ol { padding-left: 16px; margin: 0; }
-  .inv-terms ol li { font-size: 10px; color: #555; margin-bottom: 2px; line-height: 1.4; }
-  .inv-footer { text-align: center; margin-top: 10px; font-size: 10px; color: #888; border-top: 1px solid #e0dbd0; padding-top: 8px; }
-  .inv-amount-words { font-size: 11px; color: #444; font-style: italic; margin-top: 4px; }
+  .inv-terms ol li { font-size: 9.5px; color: #555; margin-bottom: 1px; line-height: 1.3; }
+  .inv-footer { text-align: center; margin-top: 8px; font-size: 9.5px; color: #888; border-top: 1px solid #e0dbd0; padding-top: 6px; }
+  .inv-amount-words { font-size: 10.5px; color: #444; font-style: italic; margin-top: 4px; }
+
 
   @media (max-width: 600px) {
     .app-body { padding: 12px; }
     .app-header { padding: 0 12px; }
     .topbar { flex-direction: column; align-items: flex-start; }
     .form-row { grid-template-columns: 1fr; }
+    .room-select-grid { grid-template-columns: 1fr; }
     .currency-rate-grid { grid-template-columns: 1fr; }
     .add-user-row { grid-template-columns: 1fr; }
   }
@@ -426,8 +443,8 @@
 
     <div class="form-section-title">Booking Details</div>
     <div class="form-group">
-      <label>Room(s) <span id="f-room-count" style="font-weight:400;color:#888;"></span></label>
-      <div id="f-room-checks" style="display:flex;flex-direction:column;gap:6px;border:1px solid #ddd;border-radius:8px;padding:8px 10px;max-height:160px;overflow-y:auto;"></div>
+      <label>Room(s) <span id="f-room-count" style="font-weight:400;color:#888;text-transform:none;"></span></label>
+      <div id="f-room-checks" class="room-select-grid"></div>
     </div>
     <div class="form-row">
       <div class="form-group">
@@ -481,11 +498,18 @@
     </div>
 
     <div class="form-section-title">💰 Pricing &amp; Currency</div>
+    <div class="form-group">
+      <label>Guest Type</label>
+      <div style="display:flex;gap:8px;">
+        <button type="button" class="guest-type-btn" id="guest-type-local" onclick="setGuestType('local')">🇱🇰 Local Guest (LKR)</button>
+        <button type="button" class="guest-type-btn" id="guest-type-foreign" onclick="setGuestType('foreign')">🌍 Foreign Guest (USD)</button>
+      </div>
+    </div>
     <div class="currency-panel">
       <div class="currency-panel-title">💱 Currency &amp; Conversion Rate</div>
       <div class="currency-rate-grid">
         <div class="rate-field">
-          <label>Rate / Night (USD $)</label>
+          <label id="rate-input-label">Rate / Night (USD $)</label>
           <input type="number" id="f-price-usd" placeholder="0.00" min="0" step="0.01" oninput="recalcFromUSD()" />
         </div>
         <div class="rate-field">
@@ -554,8 +578,9 @@
   <div class="modal-box" style="max-width:800px;">
     <div class="modal-header no-print">
       <h3>Guest Registration &amp; Invoice</h3>
-      <div style="display:flex;gap:8px;">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
         <button class="btn-sm primary" onclick="printInvoice()">🖨️ Print / Save as PDF</button>
+        <button class="btn-sm" id="whatsapp-share-btn" onclick="shareInvoiceWhatsApp()">📲 Send via WhatsApp</button>
         <button class="modal-close" onclick="closeInvoice()">✕</button>
       </div>
     </div>
@@ -641,12 +666,12 @@
 // TODO: paste your firebaseConfig object from Firebase Console →
 // Project settings → General → Your apps → Web app.
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT_ID.appspot.com",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyDwMtoamAUg8tqn9G8I7PiczG-5NudI_RY",
+  authDomain: "crystal-villa-booking.firebaseapp.com",
+  projectId: "crystal-villa-booking",
+  storageBucket: "crystal-villa-booking.firebasestorage.app",
+  messagingSenderId: "617007863904",
+  appId: "1:617007863904:web:1a23bd218d38f5fb38cb05"
 };
 
 firebase.initializeApp(firebaseConfig);
@@ -896,13 +921,22 @@ function renderStats() {
   const active = bookings.filter(b => b.checkIn <= today && b.checkOut > today).length;
   const upcoming = bookings.filter(b => b.checkIn > today).length;
   const m = `${calYear}-${pad(calMonth+1)}`;
-  const rev = bookings.filter(b => b.checkIn.startsWith(m)).reduce((s,b) => s + (parseFloat(b.price)||0) * daysBetween(b.checkIn, b.checkOut), 0);
-  const totalNights = bookings.filter(b => b.checkIn.startsWith(m)).reduce((s,b) => s + daysBetween(b.checkIn, b.checkOut), 0);
+  const monthBookings = bookings.filter(b => b.checkIn.startsWith(m));
+  const usdBookings = monthBookings.filter(b => (b.currency || 'LKR') !== 'LKR');
+  const lkrBookings = monthBookings.filter(b => (b.currency || 'LKR') === 'LKR');
+  const usdRevenue = usdBookings.reduce((s,b) => s + (parseFloat(b.price)||0) * daysBetween(b.checkIn, b.checkOut), 0);
+  const usdNights = usdBookings.reduce((s,b) => s + daysBetween(b.checkIn, b.checkOut), 0);
+  const lkrRevenue = lkrBookings.reduce((s,b) => {
+    const rate = parseFloat(b.exchangeRate) || 320;
+    return s + (parseFloat(b.price)||0) * daysBetween(b.checkIn, b.checkOut) * rate;
+  }, 0);
+  const lkrNights = lkrBookings.reduce((s,b) => s + daysBetween(b.checkIn, b.checkOut), 0);
   document.getElementById('stats-grid').innerHTML = `
     <div class="stat-card"><div class="s-label">Rooms</div><div class="s-val">5</div><div class="s-sub">2 bungalow · 1 double · 2 triple</div></div>
     <div class="stat-card"><div class="s-label">Currently active</div><div class="s-val">${active}</div><div class="s-sub">guests checked in</div></div>
     <div class="stat-card"><div class="s-label">Upcoming</div><div class="s-val">${upcoming}</div><div class="s-sub">future bookings</div></div>
-    <div class="stat-card"><div class="s-label">${MONTHS[calMonth]} revenue</div><div class="s-val">$${Math.round(rev).toLocaleString()}</div><div class="s-sub">${totalNights} nights booked</div></div>
+    <div class="stat-card"><div class="s-label">${MONTHS[calMonth]} USD Revenue</div><div class="s-val">$${Math.round(usdRevenue).toLocaleString()}</div><div class="s-sub">${usdNights} nights · foreign guests</div></div>
+    <div class="stat-card"><div class="s-label">${MONTHS[calMonth]} LKR Revenue</div><div class="s-val">Rs ${Math.round(lkrRevenue).toLocaleString()}</div><div class="s-sub">${lkrNights} nights · local guests</div></div>
   `;
 }
 
@@ -1221,6 +1255,7 @@ function openModal(prefillDate, prefillRoom) {
   document.getElementById('f-source').value = 'Direct';
   document.getElementById('f-currency').value = 'LKR';
   document.getElementById('f-rate').value = '320';
+  onCurrencyChange();
   document.getElementById('f-payment').value = '';
   document.getElementById('nights-display').style.display = 'none';
   document.getElementById('converted-display').style.display = 'none';
@@ -1256,9 +1291,14 @@ function openEditModal(id) {
   document.getElementById('f-meal').value = b.mealPlan || 'RO';
   document.getElementById('f-source').value = b.source || 'Direct';
   document.getElementById('f-price').value = b.price;
-  document.getElementById('f-price-usd').value = b.price;
   document.getElementById('f-currency').value = b.currency || 'LKR';
   document.getElementById('f-rate').value = b.exchangeRate || '320';
+  guestType = (b.currency === 'LKR') ? 'local' : 'foreign';
+  syncGuestTypeButtons();
+  updateRateLabel();
+  document.getElementById('f-price-usd').value = guestType === 'local'
+    ? ((parseFloat(b.price) || 0) * (parseFloat(b.exchangeRate) || 320)).toFixed(2)
+    : b.price;
   document.getElementById('f-payment').value = b.paymentMethod || '';
   document.getElementById('f-notes').value = b.notes || '';
   document.querySelectorAll('.pay-btn').forEach(btn => btn.classList.remove('selected'));
@@ -1287,7 +1327,7 @@ function updateNights() {
   const el = document.getElementById('nights-display');
   if (ci && co && co > ci) {
     const n = daysBetween(ci, co);
-    const rate = parseFloat(document.getElementById('f-price-usd').value) || parseFloat(document.getElementById('f-price').value) || 0;
+    const rate = parseFloat(document.getElementById('f-price').value) || 0;
     const total = rate * n;
     el.innerHTML = `🌙 <strong>${n} night${n!==1?'s':''}</strong>${rate > 0 ? ` &nbsp;·&nbsp; $${rate.toFixed(2)}/night × ${n} = <strong>$${total.toFixed(2)}</strong>` : ''}`;
     el.style.display = 'block';
@@ -1402,38 +1442,79 @@ function getChildrenAges() {
 // ═══════════════════════════════════════════════════════
 //  CURRENCY HELPERS
 // ═══════════════════════════════════════════════════════
+let guestType = 'foreign';
+
+function setGuestType(type) {
+  document.getElementById('f-currency').value = type === 'local' ? 'LKR' : 'USD';
+  onCurrencyChange();
+}
+
+function syncGuestTypeButtons() {
+  document.querySelectorAll('.guest-type-btn').forEach(b => b.classList.remove('selected'));
+  const btn = document.getElementById('guest-type-' + guestType);
+  if (btn) btn.classList.add('selected');
+}
+
+function updateRateLabel() {
+  const label = document.getElementById('rate-input-label');
+  if (!label) return;
+  label.textContent = guestType === 'local' ? 'Rate / Night (LKR Rs.)' : 'Rate / Night (USD $)';
+}
+
 function onCurrencyChange() {
   const sel = document.getElementById('f-currency');
   const opt = sel.options[sel.selectedIndex];
   const rate = parseFloat(opt.getAttribute('data-rate')) || 1;
   document.getElementById('f-rate').value = rate;
+  guestType = sel.value === 'LKR' ? 'local' : 'foreign';
+  syncGuestTypeButtons();
+  updateRateLabel();
   recalcFromUSD();
 }
 
 function recalcFromUSD() {
-  const usdVal = parseFloat(document.getElementById('f-price-usd').value) || 0;
+  const rawVal = parseFloat(document.getElementById('f-price-usd').value) || 0;
   const rateField = document.getElementById('f-rate');
   const sel = document.getElementById('f-currency');
   const opt = sel.options[sel.selectedIndex];
   if (!rateField.value) rateField.value = parseFloat(opt.getAttribute('data-rate')) || 1;
   const rate = parseFloat(rateField.value) || 1;
   const currency = sel.value;
-  const converted = usdVal * rate;
+  let usdVal, converted;
+  if (guestType === 'local') {
+    usdVal = rate > 0 ? rawVal / rate : 0;
+    converted = rawVal;
+  } else {
+    usdVal = rawVal;
+    converted = usdVal * rate;
+  }
   document.getElementById('f-price').value = usdVal > 0 ? usdVal.toFixed(2) : '';
   updateConvertedDisplay(usdVal, converted, currency, rate);
   updateNights();
 }
 
 function recalcFromRate() {
-  const usdVal = parseFloat(document.getElementById('f-price-usd').value) || 0;
+  const rawVal = parseFloat(document.getElementById('f-price-usd').value) || 0;
   const rate = parseFloat(document.getElementById('f-rate').value) || 1;
   const currency = document.getElementById('f-currency').value;
-  updateConvertedDisplay(usdVal, usdVal * rate, currency, rate);
+  if (guestType === 'local') {
+    const usd = rate > 0 ? rawVal / rate : 0;
+    document.getElementById('f-price').value = usd > 0 ? usd.toFixed(2) : '';
+    updateConvertedDisplay(usd, rawVal, currency, rate);
+  } else {
+    updateConvertedDisplay(rawVal, rawVal * rate, currency, rate);
+  }
+  updateNights();
 }
 
 function syncUSDField() {
   const v = parseFloat(document.getElementById('f-price').value) || 0;
-  document.getElementById('f-price-usd').value = v > 0 ? v.toFixed(2) : '';
+  if (guestType === 'local') {
+    const rate = parseFloat(document.getElementById('f-rate').value) || 320;
+    document.getElementById('f-price-usd').value = v > 0 ? (v * rate).toFixed(2) : '';
+  } else {
+    document.getElementById('f-price-usd').value = v > 0 ? v.toFixed(2) : '';
+  }
   recalcFromUSD();
 }
 
@@ -1643,11 +1724,62 @@ function renderAndShowInvoice(id) {
 </div>`;
 
   document.getElementById('print-area').innerHTML = html;
+  currentInvoiceMeta = { invNum, guestName: b.guestName, phone: b.phone || '' };
   document.getElementById('invoice-modal').classList.add('open');
 }
 
 function closeInvoice() { document.getElementById('invoice-modal').classList.remove('open'); }
 function printInvoice() { window.print(); }
+
+let currentInvoiceMeta = null;
+
+async function shareInvoiceWhatsApp() {
+  const printArea = document.getElementById('print-area');
+  const invoiceEl = printArea ? printArea.querySelector('.invoice-wrap') : null;
+  if (!invoiceEl) return;
+  const btn = document.getElementById('whatsapp-share-btn');
+  const originalText = btn.textContent;
+  btn.disabled = true; btn.textContent = 'Preparing…';
+  try {
+    const canvas = await html2canvas(invoiceEl, { scale: 2, backgroundColor: '#ffffff', useCORS: true });
+    const imgData = canvas.toDataURL('image/png');
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    const imgWidth = pageWidth;
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+    if (imgHeight > pageHeight) {
+      const scaledHeight = pageHeight;
+      const scaledWidth = (canvas.width * scaledHeight) / canvas.height;
+      pdf.addImage(imgData, 'PNG', (pageWidth - scaledWidth) / 2, 0, scaledWidth, scaledHeight);
+    } else {
+      pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+    }
+    const invNum = (currentInvoiceMeta && currentInvoiceMeta.invNum) || 'invoice';
+    const guestName = (currentInvoiceMeta && currentInvoiceMeta.guestName) || 'Guest';
+    const fileName = `${invNum}-${guestName}.pdf`.replace(/\s+/g, '_');
+    const blob = pdf.output('blob');
+    const file = new File([blob], fileName, { type: 'application/pdf' });
+    const shareText = `Crystal Villa — Invoice ${invNum} for ${guestName}`;
+
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({ files: [file], title: 'Crystal Villa Invoice', text: shareText });
+    } else {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = fileName; a.click();
+      URL.revokeObjectURL(url);
+      const phone = ((currentInvoiceMeta && currentInvoiceMeta.phone) || '').replace(/[^0-9]/g, '');
+      const msg = encodeURIComponent(`${shareText}. The invoice PDF has been downloaded to your device — please attach it here in WhatsApp.`);
+      window.open(phone ? `https://wa.me/${phone}?text=${msg}` : `https://wa.me/?text=${msg}`, '_blank');
+    }
+  } catch (e) {
+    console.error('WhatsApp share failed:', e);
+    alert('Could not prepare the invoice for WhatsApp. You can still use Print / Save as PDF and attach it manually.');
+  }
+  btn.disabled = false; btn.textContent = originalText;
+}
 
 // ═══════════════════════════════════════════════════════
 //  NUMBER TO WORDS
@@ -1712,16 +1844,24 @@ function populateSelects() {
     opt.value = r.id; opt.textContent = `${r.name} (${r.type})`; filterSel.appendChild(opt);
 
     const lbl = document.createElement('label');
-    lbl.style.cssText = 'display:flex;align-items:center;gap:8px;font-weight:400;cursor:pointer;';
-    lbl.innerHTML = `<input type="checkbox" value="${r.id}" onchange="updateRoomCount()"> ${r.name} (${r.type})`;
+    lbl.className = 'room-chip';
+    lbl.innerHTML = `<input type="checkbox" value="${r.id}" onchange="toggleRoomChip(this)"> <span><span class="room-chip-name">${r.name}</span><span class="room-chip-type">${r.type}</span></span>`;
     roomChecks.appendChild(lbl);
   });
+}
+function toggleRoomChip(cb) {
+  cb.closest('.room-chip').classList.toggle('selected', cb.checked);
+  updateRoomCount();
 }
 function getSelectedRooms() {
   return Array.from(document.querySelectorAll('#f-room-checks input[type=checkbox]:checked')).map(cb => cb.value);
 }
 function setSelectedRooms(ids) {
-  document.querySelectorAll('#f-room-checks input[type=checkbox]').forEach(cb => { cb.checked = ids.includes(cb.value); });
+  document.querySelectorAll('#f-room-checks input[type=checkbox]').forEach(cb => {
+    const checked = ids.includes(cb.value);
+    cb.checked = checked;
+    cb.closest('.room-chip').classList.toggle('selected', checked);
+  });
   updateRoomCount();
 }
 function updateRoomCount() {
