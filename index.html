@@ -783,6 +783,20 @@
   </div>
 </div>
 
+<!-- TODAY'S ARRIVALS POPUP -->
+<div id="today-arrivals-modal" class="modal-overlay" onclick="if(event.target===this)closeTodayArrivalsModal()">
+  <div class="modal-box" style="max-width:480px;">
+    <div class="modal-header">
+      <h3>🔔 Today We have a Booking</h3>
+      <button class="modal-close" onclick="closeTodayArrivalsModal()">✕</button>
+    </div>
+    <div id="today-arrivals-list" style="display:flex;flex-direction:column;gap:10px;max-height:60vh;overflow-y:auto;"></div>
+    <div class="modal-actions">
+      <button class="btn-sm primary" onclick="closeTodayArrivalsModal()">Got it</button>
+    </div>
+  </div>
+</div>
+
 <!-- USER MANAGEMENT MODAL -->
 <div id="user-modal" class="modal-overlay" onclick="if(event.target===this)closeUserModal()">
   <div class="modal-box" style="max-width:440px;">
@@ -1069,6 +1083,7 @@ async function doLogin(username, acc) {
   renderStats();
   renderCalendar();
   addAudit('login', `Signed in`, '🔑');
+  checkTodayArrivals();
 }
 
 function logout() {
@@ -2392,6 +2407,38 @@ function renderSchedule() {
       </div>
     </div>`;
   }).join('');
+}
+
+// ═══════════════════════════════════════════════════════
+//  TODAY'S ARRIVALS POPUP (shown once per login, after sign-in)
+// ═══════════════════════════════════════════════════════
+function checkTodayArrivals() {
+  const t = todayStr();
+  const arrivals = bookings.filter(b => b.checkIn === t).sort((a, b) => a.guestName.localeCompare(b.guestName));
+  if (!arrivals.length) return;
+
+  const listEl = document.getElementById('today-arrivals-list');
+  listEl.innerHTML = arrivals.map(b => {
+    const room = ROOMS.find(r => r.id === b.room) || { name: 'Unknown', color: '#eee', text: '#333' };
+    const nights = daysBetween(b.checkIn, b.checkOut);
+    return `
+    <div class="bk-card" style="padding:12px 14px;">
+      <div class="bk-card-top" style="margin-bottom:6px;">
+        <div class="bk-guest">${b.guestName}</div>
+        <span class="room-tag" style="background:${room.color};color:${room.text}">${room.name}</span>
+      </div>
+      <div class="bk-info">
+        <span>🛬 Arriving today · staying ${nights} night${nights !== 1 ? 's' : ''}</span>
+        ${b.phone ? `<span>📞 ${b.phone}</span>` : ''}
+        ${b.mealPlan ? `<span>🍽️ ${MEAL_LABELS[b.mealPlan] || b.mealPlan}</span>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('today-arrivals-modal').classList.add('open');
+}
+function closeTodayArrivalsModal() {
+  document.getElementById('today-arrivals-modal').classList.remove('open');
 }
 
 // ═══════════════════════════════════════════════════════
