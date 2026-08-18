@@ -78,8 +78,11 @@
   .screen.active { display: flex; }
   input, select, textarea, button { font-size: 16px; }
   button, .icon-btn, .tab-btn, .pay-btn, .icon-action, .table-action, .export-btn, .add-btn, .modal-close, .logout-btn { touch-action: manipulation; }
-  .theme-toggle-fab { position: fixed; top: 14px; right: 14px; z-index: 999; width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--border); background: var(--surface); color: var(--text); font-size: 17px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: var(--shadow); transition: background 0.2s, color 0.2s; }
+  .theme-toggle-fab { position: fixed; bottom: 20px; right: 20px; z-index: 999; width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--border); background: var(--surface); color: var(--text); font-size: 18px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: var(--shadow-lg); transition: background 0.2s, color 0.2s; }
   .theme-toggle-fab:hover { background: var(--surface2); }
+  @media (max-width: 600px) {
+    .theme-toggle-fab { bottom: 16px; right: 16px; width: 40px; height: 40px; font-size: 16px; }
+  }
   .room-chip-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
   .room-chip { flex: 1; min-width: 120px; padding: 10px 12px; border: 2px solid var(--border); border-radius: var(--radius-sm); background: var(--surface); color: var(--text); font-size: 13px; font-weight: 500; font-family: 'DM Sans', sans-serif; cursor: pointer; text-align: left; transition: all 0.15s; }
   .room-chip .rc-type { display: block; font-size: 11px; font-weight: 400; color: var(--text3); margin-top: 2px; }
