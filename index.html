@@ -291,7 +291,7 @@
   @media print {
     html, body { width: 100%; height: auto !important; min-height: 0 !important; background: #fff !important; overflow: visible !important; margin: 0 !important; }
     body * { visibility: hidden; }
-    #print-area, #print-area * { visibility: visible; }
+    #print-area, #print-area *, #pr-print-area, #pr-print-area *, #guest-pay-content, #guest-pay-content * { visibility: visible; }
 
     /* CRITICAL: fully remove the app screens and every OTHER modal from the print
        flow. Without this, #screen-app (min-height:100vh) and the closed booking /
@@ -301,25 +301,31 @@
     #modal-overlay, #cancel-modal, #user-modal { display: none !important; }
 
     /* IMPORTANT: static (not fixed) positioning — fixed elements paginate incorrectly
-       on mobile browsers and cause a stray/blank second page. Only the invoice modal
-       itself should be forced visible/in-flow for print. */
-    #invoice-modal { position: static !important; display: block !important; overflow: visible !important; height: auto !important; min-height: 0 !important; background: none !important; padding: 0 !important; margin: 0 !important; }
-    #invoice-modal .modal-box { position: static !important; max-width: 100% !important; width: 100% !important; max-height: none !important; overflow: visible !important; box-shadow: none !important; border: none !important; padding: 0 !important; margin: 0 !important; }
-    #print-area { position: static !important; width: 100% !important; max-width: 100% !important; padding: 0 !important; margin: 0 !important; background: white; }
+       on mobile browsers and cause a stray/blank second page. Only the modal that is
+       actually open (.open) should be forced visible/in-flow for print. */
+    #invoice-modal.open, #payment-request-modal.open { position: static !important; display: block !important; overflow: visible !important; height: auto !important; min-height: 0 !important; background: none !important; padding: 0 !important; margin: 0 !important; }
+    #invoice-modal.open .modal-box, #payment-request-modal.open .modal-box { position: static !important; max-width: 100% !important; width: 100% !important; max-height: none !important; overflow: visible !important; box-shadow: none !important; border: none !important; padding: 0 !important; margin: 0 !important; }
+    #print-area, #pr-print-area { position: static !important; width: 100% !important; max-width: 100% !important; padding: 0 !important; margin: 0 !important; background: white; }
     .no-print { display: none !important; }
+
+    /* Guest-facing public payment page prints just its invoice content, full width */
+    #screen-pay.active { position: static !important; display: block !important; height: auto !important; min-height: 0 !important; background: #fff !important; padding: 0 !important; }
+    #screen-pay .pay-page-wrap, #screen-pay .pay-page-card { position: static !important; width: 100% !important; max-width: 100% !important; box-shadow: none !important; padding: 0 !important; margin: 0 !important; }
 
     /* Force the proper multi-column invoice layout for print, regardless of the
        phone's narrow screen width (mobile media queries below must not leak into print) */
-    .invoice-wrap { font-size: 11px !important; line-height: 1.4 !important; width: 100% !important; }
+    .invoice-wrap, .pf-wrap { font-size: 11px !important; line-height: 1.4 !important; width: 100% !important; }
     .inv-header { flex-direction: row !important; align-items: center !important; justify-content: space-between !important; gap: 12px !important; }
     .inv-title-block { text-align: right !important; }
     .inv-grid { grid-template-columns: 1fr 1fr !important; }
     .inv-grid-3 { grid-template-columns: 1fr 1fr 1fr !important; }
-    .inv-charges-table { display: table !important; width: 100% !important; white-space: normal !important; overflow: visible !important; }
+    .inv-charges-table, .pf-table { display: table !important; width: 100% !important; white-space: normal !important; overflow: visible !important; }
     .inv-sign-grid { grid-template-columns: 1fr 1fr !important; gap: 20px !important; }
+    .pf-meta-row { flex-direction: row !important; }
 
     /* Keep related content together instead of splitting awkwardly across pages */
-    .inv-header, .inv-section, .inv-charges-table tr, .inv-terms, .inv-sign-grid, .inv-footer {
+    .inv-header, .inv-section, .inv-charges-table tr, .inv-terms, .inv-sign-grid, .inv-footer,
+    .pf-title-strip, .pf-table tr, .pf-status-banner, .pf-bank-box, .pf-footer {
       page-break-inside: avoid; break-inside: avoid;
     }
     .inv-terms { page-break-before: auto; }
@@ -356,6 +362,56 @@
   .inv-terms ol li { font-size: 10px; color: #555; margin-bottom: 2px; line-height: 1.4; }
   .inv-footer { text-align: center; margin-top: 10px; font-size: 10px; color: #888; border-top: 1px solid #e0dbd0; padding-top: 8px; }
   .inv-amount-words { font-size: 11px; color: #444; font-style: italic; margin-top: 4px; }
+
+  /* ═══════ PROFORMA / PAYMENT REQUEST INVOICE ═══════ */
+  #payment-request-modal .modal-box { max-width: 800px; }
+  .pf-wrap { font-family: 'DM Sans', sans-serif; color: #1a1714; font-size: 12px; line-height: 1.5; }
+  .pf-title-strip { text-align: center; background: #1a4f8b; color: #fff; font-family: 'DM Serif Display', serif; font-size: 18px; letter-spacing: 0.08em; padding: 8px; border-radius: 4px; margin-bottom: 12px; }
+  .pf-meta-row { display: flex; justify-content: space-between; gap: 12px; font-size: 12px; margin-bottom: 4px; flex-wrap: wrap; }
+  .pf-meta-row strong { color: #1a4f8b; }
+  .pf-guest-line { font-size: 13px; margin: 10px 0 12px; }
+  .pf-guest-line strong { color: #1a4f8b; }
+  .pf-table { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
+  .pf-table th { background: #1a4f8b; color: #fff; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; padding: 7px 10px; border: 1px solid #1a4f8b; text-align: left; }
+  .pf-table td { padding: 8px 10px; border: 1px solid #ccc; font-size: 12px; vertical-align: top; }
+  .pf-table td.pf-details-cell div { margin-bottom: 4px; }
+  .pf-table tr.pf-total-row td { background: #e8f0f8; font-weight: 700; color: #1a4f8b; font-size: 13px; }
+  .pf-amount-words { font-size: 11px; color: #444; font-style: italic; margin: 8px 0 14px; }
+  .pf-status-banner { display: flex; align-items: center; gap: 8px; border-radius: 6px; padding: 10px 14px; font-size: 13px; font-weight: 700; margin-bottom: 14px; }
+  .pf-status-banner.unpaid { background: var(--danger-light); color: var(--danger-fg); border: 1px solid #f5c0c0; }
+  .pf-status-banner.advance { background: var(--gold-light); color: #8a6414; border: 1px solid #f0d9a8; }
+  .pf-status-banner.paid { background: var(--accent-light); color: var(--accent-fg); border: 1px solid #bfe0cc; }
+  .pf-bank-box { background: #f7f5f0; border: 1px solid #e0dbd0; border-radius: 4px; padding: 10px 14px; margin-bottom: 10px; }
+  .pf-bank-box h4 { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #1a4f8b; margin-bottom: 6px; }
+  .pf-bank-box p { font-size: 11.5px; color: #333; margin: 1px 0; }
+  .pf-note { font-size: 10.5px; color: #666; font-weight: 600; text-align: center; margin-top: 10px; padding-top: 8px; border-top: 1px dashed #ccc; }
+  .pf-footer { text-align: center; margin-top: 12px; font-size: 10px; color: #888; border-top: 1px solid #e0dbd0; padding-top: 8px; }
+  .pf-admin-panel { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px; margin-bottom: 16px; }
+  .pf-admin-panel .form-row { margin-bottom: 10px; }
+  .pf-admin-panel label { display:block; font-size: 11px; font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 5px; }
+  .pf-status-pick { display: flex; gap: 8px; flex-wrap: wrap; }
+  .pf-status-pick button { flex: 1; min-width: 100px; padding: 8px 10px; border: 2px solid var(--border); border-radius: var(--radius-sm); background: var(--surface); color: var(--text); font-size: 12.5px; font-weight: 600; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: all .15s; }
+  .pf-status-pick button.selected.unpaid { border-color: var(--danger-fg); background: var(--danger-light); color: var(--danger-fg); }
+  .pf-status-pick button.selected.advance { border-color: #c9963a; background: var(--gold-light); color: #8a6414; }
+  .pf-status-pick button.selected.paid { border-color: var(--accent-fg); background: var(--accent-light); color: var(--accent-fg); }
+  .pf-card-badge { font-size: 10.5px; font-weight: 700; padding: 2px 9px; border-radius: 10px; white-space: nowrap; }
+  .pf-card-badge.unpaid { background: var(--danger-light); color: var(--danger-fg); }
+  .pf-card-badge.advance { background: var(--gold-light); color: #8a6414; }
+  .pf-card-badge.paid { background: var(--accent-light); color: var(--accent-fg); }
+  #link-copied-toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(20px); background: #1a1714; color: #fff; padding: 10px 20px; border-radius: 30px; font-size: 13px; font-weight: 500; box-shadow: var(--shadow-lg); z-index: 999; opacity: 0; pointer-events: none; transition: all .25s; }
+  #link-copied-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* GUEST-FACING PUBLIC PAYMENT PAGE */
+  #screen-pay { background: var(--bg); align-items: flex-start; justify-content: center; padding: 24px 16px 60px; }
+  .pay-page-wrap { width: 100%; max-width: 800px; }
+  .pay-page-actions { display: flex; gap: 10px; justify-content: center; margin-bottom: 18px; flex-wrap: wrap; }
+  .pay-page-card { background: #fff; border-radius: var(--radius); box-shadow: var(--shadow-lg); padding: 24px; }
+  .pay-page-error { text-align: center; padding: 3rem 1.5rem; color: var(--text2); }
+
+  @media (max-width: 700px) {
+    #payment-request-modal .modal-box { max-width: 100%; padding: 1rem; }
+    .pf-meta-row { flex-direction: column; gap: 2px; }
+  }
 
   /* ═══════ RESPONSIVE / MOBILE ═══════ */
   @media (max-width: 768px) {
@@ -457,6 +513,19 @@
         <label for="save-password-check">Save password</label>
       </div>
       <button class="btn btn-primary" onclick="loginWithPassword()">Sign in</button>
+    </div>
+  </div>
+</div>
+
+<!-- GUEST PAYMENT REQUEST PUBLIC PAGE (opened via shared payment link, no login required) -->
+<div id="screen-pay" class="screen">
+  <div class="pay-page-wrap">
+    <div class="pay-page-actions no-print">
+      <button class="btn-sm primary" id="guest-download-pdf-btn" onclick="downloadGuestPaymentPDF()">📥 Download PDF</button>
+      <button class="btn-sm" onclick="window.print()">🖨️ Print</button>
+    </div>
+    <div class="pay-page-card">
+      <div id="guest-pay-content"></div>
     </div>
   </div>
 </div>
@@ -756,6 +825,51 @@
     <div id="print-area"></div>
   </div>
 </div>
+
+<!-- PAYMENT REQUEST / PROFORMA INVOICE MODAL -->
+<div id="payment-request-modal" class="modal-overlay" onclick="if(event.target===this)closePaymentRequest()">
+  <div class="modal-box" style="max-width:800px;">
+    <div class="modal-header no-print">
+      <h3>💳 Guest Payment Request</h3>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn-sm primary" id="pr-download-pdf-btn" onclick="downloadPaymentRequestPDF()">📥 Download PDF</button>
+        <button class="btn-sm" onclick="printPaymentRequest()">🖨️ Print</button>
+        <button class="modal-close" onclick="closePaymentRequest()">✕</button>
+      </div>
+    </div>
+
+    <div class="pf-admin-panel no-print">
+      <div class="form-row" style="grid-template-columns:1fr;">
+        <div>
+          <label>Payment Status</label>
+          <div class="pf-status-pick" id="pr-status-pick">
+            <button type="button" data-status="unpaid" onclick="setPRStatus('unpaid')">🔴 Not Paid</button>
+            <button type="button" data-status="advance" onclick="setPRStatus('advance')">🟡 Advance Paid</button>
+            <button type="button" data-status="paid" onclick="setPRStatus('paid')">🟢 Fully Paid</button>
+          </div>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group" id="pr-advance-wrap" style="display:none;margin-bottom:0;">
+          <label>Advance Amount Received</label>
+          <input type="number" id="pr-advance-amount" placeholder="0.00" step="0.01" min="0" />
+        </div>
+        <div class="form-group" style="margin-bottom:0;">
+          <label>Remark (shown on the invoice)</label>
+          <input type="text" id="pr-remark" placeholder="e.g. Advance to confirm booking" />
+        </div>
+      </div>
+      <div class="modal-actions" style="margin-top:12px;">
+        <button class="btn-sm primary" onclick="savePRStatus()">💾 Save Status</button>
+        <button class="btn-sm invoice" onclick="copyPaymentLink()">🔗 Copy Payment Link for Guest</button>
+      </div>
+    </div>
+
+    <div id="pr-print-area"></div>
+  </div>
+</div>
+
+<div id="link-copied-toast">🔗 Payment link copied to clipboard!</div>
 
 <!-- CANCEL MODAL -->
 <div id="cancel-modal" class="modal-overlay" onclick="if(event.target===this)closeCancelModal()">
@@ -1204,7 +1318,7 @@ function renderBookingList() {
         <span>🌙 ${nights} night${nights!==1?'s':''}</span>
         ${b.mealPlan ? `<span>🍽️ ${MEAL_LABELS[b.mealPlan]||b.mealPlan}</span>` : ''}
         ${b.source ? `<span>📌 ${b.source}</span>` : ''}
-        <span><span class="status-dot ${status}">● ${status.charAt(0).toUpperCase()+status.slice(1)}</span></span>
+        <span><span class="status-dot ${status}">● ${status.charAt(0).toUpperCase()+status.slice(1)}</span> ${pfCardBadge(b)}</span>
         <span style="font-size:11px;color:var(--text3);">Added by: ${b.addedBy||'—'}</span>
       </div>
       <div class="bk-footer">
@@ -1213,6 +1327,7 @@ function renderBookingList() {
           <div style="font-size:11px;color:var(--text3);">${b.guestType==='local'?'Rs ':'$'}${(parseFloat(b.price)||0).toFixed(2)}/night × ${nights}</div>
         </div>
         <div class="card-actions">
+          <button class="icon-action" title="Payment Request" onclick="openPaymentRequestById('${b.id}')">💳</button>
           <button class="icon-action" title="Print Invoice" onclick="openInvoiceById('${b.id}')">🖨️</button>
           <button class="icon-action del" title="Cancel" onclick="openCancelModal('${b.id}')">⛔</button>
           ${canEdit ? `<button class="icon-action" title="Edit" onclick="openEditModal('${b.id}')">✏️</button>
@@ -2499,10 +2614,326 @@ function confirmCancelBooking() {
 }
 
 // ═══════════════════════════════════════════════════════
+//  GUEST PAYMENT REQUEST / PROFORMA INVOICE
+//  Generates a self-contained shareable link (booking details are
+//  base64-encoded directly into the URL) so a guest can view, print
+//  or download their payment request without logging in and without
+//  exposing any other booking data.
+// ═══════════════════════════════════════════════════════
+const BANK_DETAILS = {
+  payee: 'CRYSTAL VILLAS (PVT) LTD',
+  account: '0072568952',
+  bank: 'BANK OF CEYLON',
+  branch: 'DEHIWALA BRANCH',
+  country: 'SRI LANKA',
+  swift: 'BCEYLKLX',
+  bankBranchCode: '7010 / 051'
+};
+
+function defaultLogoSVG(size) {
+  size = size || 48;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="${size}" height="${size}">
+        <circle cx="50" cy="42" r="9" fill="none" stroke="white" stroke-width="2.5"/>
+        <line x1="45" y1="42" x2="55" y2="42" stroke="white" stroke-width="2"/>
+        <line x1="50" y1="37" x2="50" y2="47" stroke="white" stroke-width="2"/>
+        <path d="M 28 52 Q 35 45 42 52 Q 49 59 56 52 Q 63 45 72 52" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="22" y1="64" x2="78" y2="64" stroke="white" stroke-width="2"/>
+        <path d="M 18 80 Q 30 74 42 80 Q 54 86 66 80 Q 76 74 82 80 L 82 98 Q 54 90 18 98 Z" fill="white"/>
+      </svg>`;
+}
+
+// Small badge shown on each booking card so admins can see payment status at a glance.
+function pfCardBadge(b) {
+  const status = b.paymentStatus || 'unpaid';
+  const curSym = b.guestType === 'local' ? 'Rs ' : '$';
+  if (status === 'paid') return `<span class="pf-card-badge paid">🟢 Paid</span>`;
+  if (status === 'advance') return `<span class="pf-card-badge advance">🟡 Advance ${curSym}${(parseFloat(b.advanceAmount)||0).toLocaleString(undefined,{maximumFractionDigits:2})}</span>`;
+  return `<span class="pf-card-badge unpaid">🔴 Unpaid</span>`;
+}
+
+// Builds a normalized "info" object from a live booking record (admin side).
+function buildInfoFromBooking(b) {
+  const room = ROOMS.find(r => r.id === b.room) || { name: b.room, type: '' };
+  const nights = daysBetween(b.checkIn, b.checkOut);
+  const pricePerNight = parseFloat(b.price) || 0;
+  const total = pricePerNight * nights;
+  const isLocalGuest = b.guestType === 'local';
+  const invNum = b.invNum ? 'PF-' + String(b.invNum).padStart(3, '0') : 'PF-???';
+  return {
+    invNum,
+    dateStr: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' }),
+    guestName: b.guestName,
+    arrival: fmtDate(b.checkIn),
+    departure: fmtDate(b.checkOut),
+    nights,
+    roomLabel: `${room.name} (${room.type})`,
+    curSym: isLocalGuest ? 'Rs ' : '$',
+    curLabel: isLocalGuest ? 'LKR' : 'USD',
+    total,
+    remark: b.pfRemark || '',
+    paymentStatus: b.paymentStatus || 'unpaid',
+    advanceAmount: b.advanceAmount || 0,
+    logoHTML: defaultLogoSVG(48)
+  };
+}
+
+// Renders the actual proforma invoice HTML (matches the Crystal Villa Word invoice
+// format: Details / Currency / Amount table, amount in words, bank details, remark
+// and a note about bank charges) — shared by both the admin preview and the public
+// guest-facing link so they always look identical.
+function buildProformaHTML(info) {
+  const advance = info.paymentStatus === 'advance' ? (parseFloat(info.advanceAmount) || 0) : 0;
+  const balance = Math.max(0, info.total - advance);
+
+  let bannerClass = 'unpaid';
+  let bannerText = `🔴 PAYMENT PENDING — Amount Due: ${info.curSym}${info.total.toFixed(2)}`;
+  if (info.paymentStatus === 'advance') {
+    bannerClass = 'advance';
+    bannerText = `🟡 ADVANCE RECEIVED: ${info.curSym}${advance.toFixed(2)} &nbsp;•&nbsp; BALANCE DUE: ${info.curSym}${balance.toFixed(2)}`;
+  } else if (info.paymentStatus === 'paid') {
+    bannerClass = 'paid';
+    bannerText = `🟢 FULLY PAID — Thank you for your payment!`;
+  }
+
+  const detailsLines = [
+    `<div><strong>Guest:</strong> ${info.guestName}</div>`,
+    `<div><strong>Arrival &amp; Departure:</strong> ${info.arrival} → ${info.departure} (${info.nights} night${info.nights !== 1 ? 's' : ''})</div>`,
+    `<div><strong>Room Type &amp; No. of Rooms:</strong> ${info.roomLabel}</div>`,
+    info.remark ? `<div><strong>Remark:</strong> ${info.remark}</div>` : ''
+  ].join('');
+
+  return `
+<div class="pf-wrap">
+  <div class="inv-header" style="margin-bottom:10px;">
+    <div class="inv-logo-block">
+      <div class="inv-logo-circle">${info.logoHTML}</div>
+      <div class="inv-hotel-info">
+        <h2>Crystal Villa</h2>
+        <p>Galle Matara Road, Palena, Weligama, 81700, Sri Lanka</p>
+        <p>📞 0777 356 354 &nbsp;|&nbsp; ✉️ crys.holiday@gmail.com</p>
+        <p>www.crystalvilla.lk</p>
+      </div>
+    </div>
+    <div class="inv-title-block">
+      <h3>Proforma Invoice</h3>
+      <p><strong>Invoice No:</strong> ${info.invNum}</p>
+      <p><strong>Date:</strong> ${info.dateStr}</p>
+    </div>
+  </div>
+
+  <div class="pf-status-banner ${bannerClass}">${bannerText}</div>
+
+  <div class="pf-guest-line">This is a request for payment for the reservation detailed below. Kindly settle the amount using the bank details provided.</div>
+
+  <table class="pf-table">
+    <thead><tr><th style="width:58%;">Details</th><th style="width:15%;">Currency</th><th style="width:27%;">Amount</th></tr></thead>
+    <tbody>
+      <tr><td class="pf-details-cell">${detailsLines}</td><td>${info.curLabel}</td><td>${info.curSym}${info.total.toFixed(2)}</td></tr>
+      <tr class="pf-total-row"><td colspan="2" style="text-align:right;">TOTAL</td><td>${info.curSym}${info.total.toFixed(2)}</td></tr>
+    </tbody>
+  </table>
+
+  <div class="pf-amount-words">Amount in words: <em>${numberToWords(Math.round(info.total))} ${info.curLabel === 'LKR' ? 'Sri Lankan Rupees' : 'US Dollars'} Only</em></div>
+
+  <div class="pf-bank-box">
+    <h4>Remittance to be made to</h4>
+    <p><strong>${BANK_DETAILS.payee}</strong></p>
+    <p>A/C No.: ${BANK_DETAILS.account}</p>
+    <p>${BANK_DETAILS.bank}, ${BANK_DETAILS.branch}, ${BANK_DETAILS.country}</p>
+    <p>SWIFT Code: ${BANK_DETAILS.swift} &nbsp;|&nbsp; Bank Code / Branch Code: ${BANK_DETAILS.bankBranchCode}</p>
+  </div>
+
+  <div class="pf-note">PLEASE SETTLE YOUR PAYMENT WITH ALL INCOMING BANK CHARGES TO COVER THE TOTAL INVOICE AMOUNT</div>
+
+  <div class="pf-footer">
+    Crystal Villa · Galle Matara Road, Palena, Weligama, 81700, Sri Lanka · Tel: 0777 356 354 · crys.holiday@gmail.com<br>
+    This is a computer-generated proforma invoice issued for payment purposes.
+  </div>
+</div>`;
+}
+
+// ── Admin side: open / edit / save the payment request for a booking ──
+let currentPRId = null;
+let prPendingStatus = 'unpaid';
+
+function openPaymentRequestById(id) {
+  const b = bookings.find(x => x.id === id);
+  if (!b) return;
+  currentPRId = id;
+  prPendingStatus = b.paymentStatus || 'unpaid';
+  document.getElementById('pr-advance-amount').value = b.advanceAmount || '';
+  document.getElementById('pr-remark').value = b.pfRemark || '';
+  updatePRStatusButtons();
+  renderPaymentRequest(id);
+  document.getElementById('payment-request-modal').classList.add('open');
+  addAudit('open_payment_request', `Opened payment request for ${b.guestName}`, '💳');
+}
+
+function setPRStatus(status) {
+  prPendingStatus = status;
+  updatePRStatusButtons();
+}
+
+function updatePRStatusButtons() {
+  document.getElementById('pr-advance-wrap').style.display = prPendingStatus === 'advance' ? 'block' : 'none';
+  document.querySelectorAll('#pr-status-pick button').forEach(btn => {
+    const isSel = btn.dataset.status === prPendingStatus;
+    btn.classList.toggle('selected', isSel);
+    ['unpaid', 'advance', 'paid'].forEach(s => btn.classList.remove(s));
+    if (isSel) btn.classList.add(prPendingStatus);
+  });
+}
+
+function savePRStatus() {
+  const b = bookings.find(x => x.id === currentPRId);
+  if (!b) return;
+  b.paymentStatus = prPendingStatus;
+  b.advanceAmount = prPendingStatus === 'advance' ? (parseFloat(document.getElementById('pr-advance-amount').value) || 0) : 0;
+  b.pfRemark = document.getElementById('pr-remark').value.trim();
+  saveBookings();
+  addAudit('update_payment_status', `Set payment status to "${b.paymentStatus}" for ${b.guestName}${b.paymentStatus === 'advance' ? ' (advance: ' + b.advanceAmount + ')' : ''}`, '💳');
+  renderPaymentRequest(currentPRId);
+  if (document.getElementById('tab-bookings').style.display !== 'none') renderBookingList();
+}
+
+function renderPaymentRequest(id) {
+  const b = bookings.find(x => x.id === id);
+  if (!b) return;
+  document.getElementById('pr-print-area').innerHTML = buildProformaHTML(buildInfoFromBooking(b));
+}
+
+function closePaymentRequest() {
+  document.getElementById('payment-request-modal').classList.remove('open');
+  currentPRId = null;
+}
+function printPaymentRequest() { window.print(); }
+
+function downloadPaymentRequestPDF() {
+  const el = document.getElementById('pr-print-area');
+  if (!el || !el.innerHTML.trim()) return;
+  const b = bookings.find(x => x.id === currentPRId);
+  const invNum = (b && b.invNum) ? 'PF-' + String(b.invNum).padStart(3, '0') : 'payment-request';
+  const guestPart = b ? b.guestName.replace(/[^a-z0-9]+/gi, '-').replace(/^-+|-+$/g, '') : 'guest';
+  downloadElementAsPDF(el, `${invNum}-${guestPart}.pdf`, document.getElementById('pr-download-pdf-btn'));
+}
+
+// Generates a self-contained payment link — all invoice data is base64-encoded
+// straight into the URL, so the guest can open it, view status, and download/print
+// a one-page A4 PDF without ever logging in or touching the shared booking database.
+function copyPaymentLink() {
+  const b = bookings.find(x => x.id === currentPRId);
+  if (!b) return;
+
+  // Make sure whatever is currently in the form (even if not saved yet) goes into the link.
+  savePRStatus();
+
+  const info = buildInfoFromBooking(bookings.find(x => x.id === currentPRId));
+  const payload = JSON.stringify(info);
+  // encodeURIComponent is required here: base64 can contain '+' characters, and
+  // URLSearchParams treats a literal '+' in a query string as a space, which would
+  // silently corrupt the data when the guest's browser parses the link.
+  const encoded = encodeURIComponent(btoa(unescape(encodeURIComponent(payload))));
+  const url = `${location.origin}${location.pathname}?pay=${encoded}`;
+
+  const finish = () => {
+    showLinkToast();
+    addAudit('send_payment_request', `Generated payment request link for ${b.guestName}`, '🔗');
+  };
+
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(url).then(finish).catch(() => { window.prompt('Copy this payment link and send it to the guest:', url); finish(); });
+  } else {
+    window.prompt('Copy this payment link and send it to the guest:', url);
+    finish();
+  }
+}
+
+function showLinkToast() {
+  const t = document.getElementById('link-copied-toast');
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ── Guest side: public, no-login page rendered from the link's embedded data ──
+function tryShowGuestPaymentPage() {
+  const params = new URLSearchParams(location.search);
+  const encoded = params.get('pay');
+  if (!encoded) return false;
+
+  let info = null;
+  try { info = JSON.parse(decodeURIComponent(escape(atob(encoded)))); } catch (e) { info = null; }
+
+  document.getElementById('screen-login').classList.remove('active');
+  document.getElementById('screen-pay').classList.add('active');
+  const contentEl = document.getElementById('guest-pay-content');
+
+  if (!info || !info.guestName || typeof info.total !== 'number') {
+    contentEl.innerHTML = `<div class="pay-page-error"><div style="font-size:40px;margin-bottom:10px;">⚠️</div><p>This payment link looks invalid or incomplete. Please contact Crystal Villa for a new link.</p></div>`;
+    document.getElementById('guest-download-pdf-btn').style.display = 'none';
+    return true;
+  }
+  contentEl.innerHTML = buildProformaHTML(info);
+  return true;
+}
+
+function downloadGuestPaymentPDF() {
+  const el = document.getElementById('guest-pay-content');
+  if (!el || !el.innerHTML.trim()) return;
+  const nameMatch = el.querySelector('.inv-title-block p');
+  downloadElementAsPDF(el, 'Crystal-Villa-Payment-Request.pdf', document.getElementById('guest-download-pdf-btn'));
+}
+
+// Shared html2pdf helper — forces a fixed desktop-style width during capture so the
+// exported PDF always uses the full layout (not the stacked mobile layout), and fits
+// cleanly on a single A4 page, matching the behaviour of the main invoice download.
+function downloadElementAsPDF(el, filename, btn) {
+  const originalLabel = btn ? btn.innerHTML : null;
+  if (btn) { btn.disabled = true; btn.innerHTML = '⏳ Generating...'; }
+
+  const CAPTURE_WIDTH = 780;
+  const prevWidth = el.style.width;
+  const prevMaxWidth = el.style.maxWidth;
+  el.style.width = CAPTURE_WIDTH + 'px';
+  el.style.maxWidth = CAPTURE_WIDTH + 'px';
+
+  const opt = {
+    margin: [8, 8, 8, 8],
+    filename: filename,
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff', width: CAPTURE_WIDTH, windowWidth: CAPTURE_WIDTH },
+    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+    pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+  };
+
+  const restore = () => { el.style.width = prevWidth; el.style.maxWidth = prevMaxWidth; };
+
+  if (typeof html2pdf === 'undefined') {
+    restore();
+    if (btn) { btn.disabled = false; btn.innerHTML = originalLabel; }
+    alert('PDF library could not load (check your internet connection). Opening print dialog instead — choose "Save as PDF" there.');
+    window.print();
+    return;
+  }
+
+  html2pdf().set(opt).from(el).save().then(() => {
+    restore();
+    if (btn) { btn.disabled = false; btn.innerHTML = originalLabel; }
+  }).catch(err => {
+    console.error('PDF generation failed:', err);
+    restore();
+    if (btn) { btn.disabled = false; btn.innerHTML = originalLabel; }
+    alert('PDF generation failed. Please try the Print button instead.');
+  });
+}
+
+// ═══════════════════════════════════════════════════════
 //  INIT
 // ═══════════════════════════════════════════════════════
 (async function init() {
   initTheme();
+  // A shared guest payment link (?pay=...) bypasses login entirely — the invoice
+  // data travels inside the URL itself, so no booking database access is needed.
+  if (tryShowGuestPaymentPage()) return;
   document.getElementById('inp-password').addEventListener('keydown', e => { if (e.key==='Enter') loginWithPassword(); });
   document.getElementById('inp-username').addEventListener('keydown', e => { if (e.key==='Enter') document.getElementById('inp-password').focus(); });
   loadSavedCredentials();
