@@ -2659,6 +2659,13 @@ function buildInfoFromBooking(b) {
   const total = pricePerNight * nights;
   const isLocalGuest = b.guestType === 'local';
   const invNum = b.invNum ? 'PF-' + String(b.invNum).padStart(3, '0') : 'PF-???';
+
+  // Use the admin-uploaded logo (same one used on the full invoice) when available.
+  const customLogo = localStorage.getItem('cvInvoiceLogo');
+  const logoHTML = customLogo
+    ? `<img src="${customLogo}" alt="Crystal Villa Logo" style="width:72px;height:72px;object-fit:contain;" />`
+    : defaultLogoSVG(48);
+
   return {
     invNum,
     dateStr: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' }),
@@ -2673,7 +2680,7 @@ function buildInfoFromBooking(b) {
     remark: b.pfRemark || '',
     paymentStatus: b.paymentStatus || 'unpaid',
     advanceAmount: b.advanceAmount || 0,
-    logoHTML: defaultLogoSVG(48)
+    logoHTML
   };
 }
 
@@ -2828,6 +2835,10 @@ function copyPaymentLink() {
   savePRStatus();
 
   const info = buildInfoFromBooking(bookings.find(x => x.id === currentPRId));
+  // The link itself must stay short and reliable (WhatsApp/SMS-safe), so it always
+  // uses the default icon logo rather than embedding a large uploaded logo image —
+  // the admin preview above already shows your real logo for you to check.
+  info.logoHTML = defaultLogoSVG(48);
   const payload = JSON.stringify(info);
   // encodeURIComponent is required here: base64 can contain '+' characters, and
   // URLSearchParams treats a literal '+' in a query string as a space, which would
