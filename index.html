@@ -2650,9 +2650,19 @@ function confirmCancelBooking() {
 //  or download their payment request without logging in and without
 //  exposing any other booking data.
 // ═══════════════════════════════════════════════════════
-const BANK_DETAILS = {
+const BANK_DETAILS_LOCAL = {
   payee: 'CRYSTAL VILLAS (PVT) LTD',
   account: '0072568952',
+  bank: 'BANK OF CEYLON',
+  branch: 'DEHIWALA BRANCH',
+  country: 'SRI LANKA',
+  swift: 'BCEYLKLX',
+  bankBranchCode: '7010 / 051'
+};
+const BANK_DETAILS_FOREIGN = {
+  payee: 'CRYSTAL HOLIDAYS PVT LTD (Head Office)',
+  account: '830 15324',
+  accountLabel: 'FOREIGN CURRENCY A/C NO.',
   bank: 'BANK OF CEYLON',
   branch: 'DEHIWALA BRANCH',
   country: 'SRI LANKA',
@@ -2706,6 +2716,7 @@ function buildInfoFromBooking(b) {
     roomLabel: `${room.name} (${room.type})`,
     curSym: isLocalGuest ? 'Rs ' : '$',
     curLabel: isLocalGuest ? 'LKR' : 'USD',
+    isLocalGuest,
     total,
     remark: b.pfRemark || '',
     paymentStatus: b.paymentStatus || 'unpaid',
@@ -2721,6 +2732,13 @@ function buildInfoFromBooking(b) {
 function buildProformaHTML(info) {
   const advance = info.paymentStatus === 'advance' ? (parseFloat(info.advanceAmount) || 0) : 0;
   const balance = Math.max(0, info.total - advance);
+
+  // Pick the right settlement account: local guests pay into the LKR
+  // Crystal Villas account, foreign guests pay into the Crystal Holidays
+  // foreign currency account. Fall back to curLabel for older payment
+  // links generated before isLocalGuest was stored in the payload.
+  const isLocal = typeof info.isLocalGuest === 'boolean' ? info.isLocalGuest : (info.curLabel === 'LKR');
+  const bank = isLocal ? BANK_DETAILS_LOCAL : BANK_DETAILS_FOREIGN;
 
   let bannerClass = 'unpaid';
   let bannerText = `🔴 PAYMENT PENDING — Amount Due: ${info.curSym}${info.total.toFixed(2)}`;
@@ -2775,10 +2793,10 @@ function buildProformaHTML(info) {
 
   <div class="pf-bank-box">
     <h4>Remittance to be made to</h4>
-    <p><strong>${BANK_DETAILS.payee}</strong></p>
-    <p>A/C No.: ${BANK_DETAILS.account}</p>
-    <p>${BANK_DETAILS.bank}, ${BANK_DETAILS.branch}, ${BANK_DETAILS.country}</p>
-    <p>SWIFT Code: ${BANK_DETAILS.swift} &nbsp;|&nbsp; Bank Code / Branch Code: ${BANK_DETAILS.bankBranchCode}</p>
+    <p><strong>${bank.payee}</strong></p>
+    <p>${bank.accountLabel || 'A/C No.'}: ${bank.account}</p>
+    <p>${bank.bank}, ${bank.branch}, ${bank.country}</p>
+    <p>SWIFT Code: ${bank.swift} &nbsp;|&nbsp; Bank Code / Branch Code: ${bank.bankBranchCode}</p>
   </div>
 
   <div class="pf-note">PLEASE SETTLE YOUR PAYMENT WITH ALL INCOMING BANK CHARGES TO COVER THE TOTAL INVOICE AMOUNT</div>
