@@ -2097,6 +2097,26 @@ function renderAndShowInvoice(id) {
   const adults = b.adults || '—';
   const children = b.children || '0';
 
+  // Payment status: advance / full payment already recorded on the booking
+  // (same paymentStatus & advanceAmount used by the proforma invoice) is
+  // reflected here too — the guest invoice total is reduced by any advance
+  // already paid, and a status banner shows what's still due.
+  const paymentStatus = b.paymentStatus || 'unpaid';
+  const advanceUSD = paymentStatus === 'advance' ? (parseFloat(b.advanceAmount) || 0) : 0;
+  const balanceUSD = paymentStatus === 'paid' ? 0 : Math.max(0, totalUSD - advanceUSD);
+  const advanceLocal = advanceUSD * exchangeRate;
+  const balanceLocal = balanceUSD * exchangeRate;
+
+  let payBannerClass = 'unpaid';
+  let payBannerText = `🔴 PAYMENT PENDING — Amount Due: ${curSym}${totalUSD.toFixed(2)}`;
+  if (paymentStatus === 'advance') {
+    payBannerClass = 'advance';
+    payBannerText = `🟡 ADVANCE RECEIVED: ${curSym}${advanceUSD.toFixed(2)} &nbsp;•&nbsp; BALANCE DUE: ${curSym}${balanceUSD.toFixed(2)}`;
+  } else if (paymentStatus === 'paid') {
+    payBannerClass = 'paid';
+    payBannerText = `🟢 FULLY PAID — Thank you for your payment!`;
+  }
+
   // Invoice logo uses admin-set value from localStorage (if any)
   const customLogo = localStorage.getItem('cvInvoiceLogo'); // expected: dataURL or https URL
   const logoHTML = customLogo
@@ -2156,6 +2176,8 @@ function renderAndShowInvoice(id) {
     </div>
   </div>
 
+  <div class="pf-status-banner ${payBannerClass}">${payBannerText}</div>
+
   <div class="inv-section">
     <div class="inv-section-title">Charges</div>
     <table class="inv-charges-table">
@@ -2191,20 +2213,28 @@ function renderAndShowInvoice(id) {
           <td colspan="3" style="text-align:right;font-weight:600;">Sub Total (Incl. VAT &amp; Service)</td>
           <td style="text-align:right;font-weight:600;">${curSym}${totalUSD.toFixed(2)}</td>
         </tr>
+        ${advanceUSD > 0 ? `<tr>
+          <td colspan="3" style="text-align:right;">Advance Paid</td>
+          <td style="text-align:right;">- ${curSym}${advanceUSD.toFixed(2)}</td>
+        </tr>
+        ${(!isLocalGuest && currency !== 'USD') ? `<tr>
+          <td colspan="3" style="text-align:right;color:#666;font-size:11px;">Advance Paid in ${currency}</td>
+          <td style="text-align:right;color:#666;font-size:11px;">- ${currency} ${advanceLocal.toLocaleString(undefined,{maximumFractionDigits:2})}</td>
+        </tr>` : ''}` : ''}
       </tbody>
       <tfoot>
         <tr class="inv-total-row">
-          <td colspan="3" style="text-align:right;">TOTAL DUE (${curLabel})</td>
-          <td style="text-align:right;">${curSym}${totalUSD.toFixed(2)}</td>
+          <td colspan="3" style="text-align:right;">${paymentStatus === 'paid' ? 'PAID IN FULL' : (advanceUSD > 0 ? 'BALANCE DUE' : 'TOTAL DUE')} (${curLabel})</td>
+          <td style="text-align:right;">${curSym}${balanceUSD.toFixed(2)}</td>
         </tr>
         ${(!isLocalGuest && currency !== 'USD') ? `<tr class="inv-total-row">
-          <td colspan="3" style="text-align:right;font-size:11px;">TOTAL IN ${currency}</td>
-          <td style="text-align:right;font-size:11px;">${currency} ${totalLocal.toLocaleString(undefined,{maximumFractionDigits:2})}</td>
+          <td colspan="3" style="text-align:right;font-size:11px;">${paymentStatus === 'paid' ? 'PAID IN FULL' : (advanceUSD > 0 ? 'BALANCE DUE' : 'TOTAL')} IN ${currency}</td>
+          <td style="text-align:right;font-size:11px;">${currency} ${balanceLocal.toLocaleString(undefined,{maximumFractionDigits:2})}</td>
         </tr>` : ''}
       </tfoot>
     </table>
     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-top:6px;">
-      <div class="inv-amount-words">Amount in words: <em>${numberToWords(Math.round(totalUSD))} ${isLocalGuest ? 'Sri Lankan Rupees' : 'US Dollars'} Only</em></div>
+      <div class="inv-amount-words">Amount in words: <em>${numberToWords(Math.round(balanceUSD))} ${isLocalGuest ? 'Sri Lankan Rupees' : 'US Dollars'} Only</em></div>
       ${b.paymentMethod ? `<span style="background:${payBadgeColor(b.paymentMethod).bg};color:${payBadgeColor(b.paymentMethod).text};border-radius:4px;padding:3px 12px;font-size:12px;font-weight:700;">${payIcon(b.paymentMethod)} ${b.paymentMethod}</span>` : ''}
     </div>
   </div>
