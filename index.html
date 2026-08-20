@@ -2736,11 +2736,12 @@ function buildProformaHTML(info) {
     <thead><tr><th style="width:58%;">Details</th><th style="width:15%;">Currency</th><th style="width:27%;">Amount</th></tr></thead>
     <tbody>
       <tr><td class="pf-details-cell">${detailsLines}</td><td>${info.curLabel}</td><td>${info.curSym}${info.total.toFixed(2)}</td></tr>
-      <tr class="pf-total-row"><td colspan="2" style="text-align:right;">TOTAL</td><td>${info.curSym}${info.total.toFixed(2)}</td></tr>
+      ${advance > 0 ? `<tr><td colspan="2" style="text-align:right;">Advance Paid</td><td>- ${info.curSym}${advance.toFixed(2)}</td></tr>` : ''}
+      <tr class="pf-total-row"><td colspan="2" style="text-align:right;">${advance > 0 ? 'BALANCE DUE' : 'TOTAL'}</td><td>${info.curSym}${(advance > 0 ? balance : info.total).toFixed(2)}</td></tr>
     </tbody>
   </table>
 
-  <div class="pf-amount-words">Amount in words: <em>${numberToWords(Math.round(info.total))} ${info.curLabel === 'LKR' ? 'Sri Lankan Rupees' : 'US Dollars'} Only</em></div>
+  <div class="pf-amount-words">Amount in words: <em>${numberToWords(Math.round(advance > 0 ? balance : info.total))} ${info.curLabel === 'LKR' ? 'Sri Lankan Rupees' : 'US Dollars'} Only</em></div>
 
   <div class="pf-bank-box">
     <h4>Remittance to be made to</h4>
