@@ -267,6 +267,18 @@
   .role-badge { display: inline-flex; padding: 2px 10px; border-radius: 10px; font-size: 11px; font-weight: 600; }
   .role-badge.admin { background: #fdf5e6; color: #c9963a; }
   .role-badge.staff { background: var(--blue-light); color: var(--blue-fg); }
+  /* Permission toggle switches */
+  .perm-table { width: 100%; border-collapse: collapse; }
+  .perm-table th, .perm-table td { padding: 10px 8px; border-bottom: 1px solid var(--border); font-size: 12.5px; text-align: left; vertical-align: middle; }
+  .perm-table th { font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text3); font-weight: 700; }
+  .perm-switch { position: relative; display: inline-block; width: 38px; height: 21px; vertical-align: middle; }
+  .perm-switch input { opacity: 0; width: 0; height: 0; }
+  .perm-switch .slider { position: absolute; cursor: pointer; inset: 0; background: #d5d1c8; transition: .15s; border-radius: 21px; }
+  .perm-switch .slider:before { position: absolute; content: ""; height: 15px; width: 15px; left: 3px; bottom: 3px; background: white; transition: .15s; border-radius: 50%; }
+  .perm-switch input:checked + .slider { background: var(--accent, #2c5f3f); }
+  .perm-switch input:checked + .slider:before { transform: translateX(17px); }
+  .perm-switch input:disabled + .slider { opacity: .4; cursor: not-allowed; }
+  .perm-admin-note { font-size: 11px; color: var(--text3); }
   .table-action { padding: 4px 12px; border: 1px solid var(--border); border-radius: 6px; background: transparent; cursor: pointer; font-size: 12px; font-family: 'DM Sans', sans-serif; color: var(--text2); transition: all 0.15s; }
   .table-action:hover { background: var(--surface2); }
   .table-action.del { color: var(--danger-fg); }
@@ -569,7 +581,7 @@
       <button class="tab-btn" onclick="switchTab('bookings', this)">📋 All Bookings</button>
       <button class="tab-btn" onclick="switchTab('schedule', this)">🛎️ Arrivals/Departures</button>
       <button class="tab-btn admin-only-tab" onclick="switchTab('admin', this)" style="display:none;">⚙️ Admin</button>
-      <button class="tab-btn admin-only-tab" onclick="switchTab('accounts', this)" style="display:none;">💼 Accounts</button>
+      <button class="tab-btn accounts-tab" onclick="switchTab('accounts', this)" style="display:none;">💼 Accounts</button>
     </div>
 
 
@@ -985,7 +997,7 @@ let lastSyncIso = null;
 let persistTimer = null;
 let suppressNextSnapshot = false; // avoids a flicker right after our own write
 
-const EMPTY_STATE = { bookings: [], extraUsers: {}, auditLog: [], invoiceCounter: 0, invoiceLogo: null, accountsRate: 320 };
+const EMPTY_STATE = { bookings: [], extraUsers: {}, auditLog: [], invoiceCounter: 0, invoiceLogo: null, accountsRate: 320, userPermissions: {} };
 let accountsRate = 320;
 
 function applyStateToLocal(d) {
@@ -994,6 +1006,7 @@ function applyStateToLocal(d) {
   auditLog = Array.isArray(d.auditLog) ? d.auditLog : [];
   invoiceCounter = d.invoiceCounter || 0;
   accountsRate = parseFloat(d.accountsRate) || 320;
+  userPermissions = d.userPermissions || {};
   if (d.invoiceLogo) localStorage.setItem('cvInvoiceLogo', d.invoiceLogo);
   else localStorage.removeItem('cvInvoiceLogo');
 }
@@ -1012,7 +1025,7 @@ async function loadData() {
   } catch (e) {
     console.error('Firebase load failed:', e);
     alert('Could not load data from Firebase. Check your internet connection or the firebaseConfig values in the code.');
-    bookings = []; extraUsers = {}; auditLog = []; invoiceCounter = 0; accountsRate = 320;
+    bookings = []; extraUsers = {}; auditLog = []; invoiceCounter = 0; accountsRate = 320; userPermissions = {};
   }
 }
 
@@ -1022,7 +1035,7 @@ function persistState() {
   persistTimer = setTimeout(async () => {
     try {
       const payload = {
-        bookings, extraUsers, auditLog, invoiceCounter, accountsRate,
+        bookings, extraUsers, auditLog, invoiceCounter, accountsRate, userPermissions,
         invoiceLogo: localStorage.getItem('cvInvoiceLogo') || null,
       };
       suppressNextSnapshot = true;
@@ -1090,6 +1103,21 @@ let bookings = [];
 let auditLog = [];
 let extraUsers = {}; // additional users created by admin
 let invoiceCounter = 0; // persisted
+let userPermissions = {}; // { username: { editAllBookings, deleteBookings, viewAccounts, managePayments } } — admin-granted permissions for non-admin users, persisted
+
+// Permissions an admin can grant to a non-admin (staff) user, shown in
+// Admin → User Access & Permissions. Admin accounts always have every
+// permission implicitly, regardless of what's stored here.
+const PERMISSION_DEFS = [
+  { key: 'editAllBookings', label: 'Edit Bookings', desc: 'Edit any booking, not just the ones this user added' },
+  { key: 'deleteBookings',  label: 'Delete Bookings', desc: 'Cancel / delete bookings' },
+  { key: 'managePayments',  label: 'Payment Requests', desc: 'Create & send proforma invoice / payment request links' },
+  { key: 'viewAccounts',    label: 'Accounts Tab', desc: 'View the Accounts (financial reports) tab' },
+];
+function hasPerm(key) {
+  if (isAdmin()) return true;
+  return !!(currentUser && currentUser.permissions && currentUser.permissions[key]);
+}
 
 // ═══════════════════════════════════════════════════════
 //  STORAGE
@@ -1180,11 +1208,12 @@ function showLoginError(msg) {
 }
 
 async function doLogin(username, acc) {
-  currentUser = { username, ...acc };
+  currentUser = { username, ...acc, permissions: userPermissions[username] || {} };
   saveSession(username);
   const signInBtn = document.querySelector('.login-card .btn-primary');
   if (signInBtn) { signInBtn.disabled = true; signInBtn.textContent = 'Loading your data…'; }
   await loadData();
+  currentUser.permissions = userPermissions[username] || {}; // re-apply after loadData() refreshes userPermissions from the cloud
   if (signInBtn) { signInBtn.disabled = false; signInBtn.textContent = 'Sign in'; }
   document.getElementById('screen-login').classList.remove('active');
   document.getElementById('screen-app').classList.add('active');
@@ -1196,9 +1225,13 @@ async function doLogin(username, acc) {
   rb.textContent = acc.role === 'admin' ? 'ADMIN' : 'STAFF';
   rb.style.background = acc.role === 'admin' ? '#fdf5e6' : '#e8f0f8';
   rb.style.color = acc.role === 'admin' ? '#c9963a' : '#1a4f8b';
-  // Show admin tab only for admin
+  // Admin tab (user management & permissions) is strictly admin-only.
   document.querySelectorAll('.admin-only-tab').forEach(t => {
     t.style.display = isAdmin() ? '' : 'none';
+  });
+  // Accounts tab is admin-only by default, but can be granted to staff via permissions.
+  document.querySelectorAll('.accounts-tab').forEach(t => {
+    t.style.display = (isAdmin() || hasPerm('viewAccounts')) ? '' : 'none';
   });
   populateSelects();
   renderStats();
@@ -1313,7 +1346,8 @@ function renderBookingList() {
     const status = getStatus(b);
     const nights = daysBetween(b.checkIn, b.checkOut);
     const total = (parseFloat(b.price)||0) * nights;
-    const canEdit = isAdmin();
+    const canEdit = isAdmin() || hasPerm('editAllBookings') || b.addedBy === currentUser.name;
+    const canDelete = isAdmin() || hasPerm('deleteBookings');
     return `
     <div class="bk-card">
       <div class="bk-card-top">
@@ -1334,11 +1368,11 @@ function renderBookingList() {
           <div style="font-size:11px;color:var(--text3);">${b.guestType==='local'?'Rs ':'$'}${(parseFloat(b.price)||0).toFixed(2)}/night × ${nights}</div>
         </div>
         <div class="card-actions">
-          <button class="icon-action" title="Payment Request" onclick="openPaymentRequestById('${b.id}')">💳</button>
+          ${(isAdmin() || hasPerm('managePayments')) ? `<button class="icon-action" title="Payment Request" onclick="openPaymentRequestById('${b.id}')">💳</button>` : ''}
           <button class="icon-action" title="Print Invoice" onclick="openInvoiceById('${b.id}')">🖨️</button>
           <button class="icon-action del" title="Cancel" onclick="openCancelModal('${b.id}')">⛔</button>
-          ${canEdit ? `<button class="icon-action" title="Edit" onclick="openEditModal('${b.id}')">✏️</button>
-          <button class="icon-action del" title="Delete" onclick="deleteBooking('${b.id}')">🗑️</button>` : ''}
+          ${canEdit ? `<button class="icon-action" title="Edit" onclick="openEditModal('${b.id}')">✏️</button>` : ''}
+          ${canDelete ? `<button class="icon-action del" title="Delete" onclick="deleteBooking('${b.id}')">🗑️</button>` : ''}
         </div>
       </div>
     </div>`;
@@ -1423,6 +1457,43 @@ function renderAdminPanel() {
       <div style="font-size:12px;color:var(--text3);margin-top:10px;">Used to show dual LKR/USD totals in the Accounts tab, regardless of each booking's own guest currency.</div>
     </div>`;
 
+  // ── USER ACCESS & PERMISSIONS (admin only) ──
+  // Lets an admin enable/disable specific capabilities — booking edit,
+  // booking delete, payment requests, accounts access — per staff user,
+  // without making them a full admin.
+  const staffAccounts = Object.entries(allAccounts).filter(([, acc]) => acc.role !== 'admin');
+  const permHeaderCells = PERMISSION_DEFS.map(p => `<th title="${p.desc}">${p.label}</th>`).join('');
+  const permRows = staffAccounts.length === 0
+    ? `<tr><td colspan="${PERMISSION_DEFS.length + 1}" style="text-align:center;color:var(--text3);padding:16px;">No staff users yet — add one above to grant permissions.</td></tr>`
+    : staffAccounts.map(([uname, acc]) => {
+        const perms = userPermissions[uname] || {};
+        const cells = PERMISSION_DEFS.map(p => `
+          <td>
+            <label class="perm-switch">
+              <input type="checkbox" ${perms[p.key] ? 'checked' : ''} onchange="togglePermission('${uname}','${p.key}', this.checked)" />
+              <span class="slider"></span>
+            </label>
+          </td>`).join('');
+        return `<tr>
+          <td><div style="display:flex;align-items:center;gap:8px;">
+            <div style="width:26px;height:26px;border-radius:50%;background:${acc.color||'#1a4f8b'};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:white;">${acc.initials||uname.substring(0,2).toUpperCase()}</div>
+            <div><div style="font-weight:600;">${acc.name}</div><div style="font-size:11px;color:var(--text3);">@${uname}</div></div>
+          </div></td>
+          ${cells}
+        </tr>`;
+      }).join('');
+  const permissionsSection = `
+    <div class="admin-section">
+      <h4>🔐 User Access &amp; Permissions</h4>
+      <p class="perm-admin-note" style="margin-bottom:12px;">Grant staff users extra access without making them full admins. Admin accounts always have full access to everything. Changes take effect immediately for that user (on their next action / next login).</p>
+      <div class="user-table-wrap">
+        <table class="perm-table">
+          <thead><tr><th>User</th>${permHeaderCells}</tr></thead>
+          <tbody>${permRows}</tbody>
+        </table>
+      </div>
+    </div>`;
+
   document.getElementById('admin-content').innerHTML = `
     <!-- USER MANAGEMENT -->
     <div class="admin-section">
@@ -1435,6 +1506,8 @@ function renderAdminPanel() {
         <button class="add-btn" onclick="openAddUserModal()">＋ Add New User</button>
       </div>
     </div>
+
+    ${permissionsSection}
 
     ${logoSection}
 
@@ -1538,8 +1611,27 @@ function removeUser(username) {
   if (!confirm(`Remove user @${username}? This cannot be undone.`)) return;
   addAudit('remove_user', `Removed user @${username}`, '🗑️');
   delete extraUsers[username];
+  delete userPermissions[username];
   saveExtraUsers();
+  savePermissionsState();
   renderAdminPanel();
+}
+
+// ═══════════════════════════════════════════════════════
+//  USER ACCESS & PERMISSIONS (admin only)
+// ═══════════════════════════════════════════════════════
+function savePermissionsState() { persistState(); }
+
+function togglePermission(username, key, checked) {
+  if (!isAdmin()) return;
+  if (!userPermissions[username]) userPermissions[username] = {};
+  userPermissions[username][key] = checked;
+  savePermissionsState();
+  const def = PERMISSION_DEFS.find(p => p.key === key);
+  addAudit('edit_permissions', `${checked ? 'Granted' : 'Revoked'} "${def ? def.label : key}" for @${username}`, '🔐');
+  // If the permission change affects the currently logged-in user in another
+  // tab/device, this device's own currentUser object isn't touched here —
+  // it's refreshed the next time that user's session reloads/logs in.
 }
 
 // ═══════════════════════════════════════════════════════
@@ -1574,7 +1666,7 @@ function clearInvoiceLogo() {
 //  ACCOUNTS PANEL (Admin only)
 // ═══════════════════════════════════════════════════════
 function renderAccountsPanel() {
-  if (!isAdmin()) {
+  if (!isAdmin() && !hasPerm('viewAccounts')) {
     document.getElementById('accounts-content').innerHTML = `<div class="access-denied">🚫 Access Denied — Admin only</div>`;
     return;
   }
@@ -1683,7 +1775,7 @@ function exportAccountsCSV() {
 }
 
 function openAccountsInvoiceById(id) {
-  if (!isAdmin()) { alert('Only admin can view Accounts documents.'); return; }
+  if (!isAdmin() && !hasPerm('viewAccounts')) { alert('Only admin can view Accounts documents.'); return; }
   const b = bookings.find(x => x.id === id);
   if (!b) return;
   addAudit('print_accounts_invoice', `Printed Accounts invoice for ${b.guestName}`, '🖨️');
@@ -1802,10 +1894,10 @@ function openModal(prefillDate, prefillRoom) {
 function quickAdd(date, roomId) { openModal(date, roomId); }
 
 function openEditModal(id) {
-  // Staff can only edit if they added it — admin can edit all
+  // Staff can edit if: they added it, OR they've been granted the "Edit Bookings" permission by an admin. Admins can always edit.
   const b = bookings.find(x => x.id === id);
   if (!b) return;
-  if (!isAdmin() && b.addedBy !== currentUser.name) {
+  if (!isAdmin() && !hasPerm('editAllBookings') && b.addedBy !== currentUser.name) {
     alert('You can only edit bookings you added. Contact an admin to edit this booking.');
     return;
   }
@@ -1939,7 +2031,7 @@ function saveBooking() {
 }
 
 function deleteBooking(id) {
-  if (!isAdmin()) { alert('Only admin can delete bookings.'); return; }
+  if (!isAdmin() && !hasPerm('deleteBookings')) { alert('You do not have permission to delete bookings. Contact an admin.'); return; }
   const b = bookings.find(x => x.id === id);
   if (!confirm('Delete this booking? This cannot be undone.')) return;
   addAudit('delete_booking', `Deleted booking for ${b ? b.guestName : id}`, '🗑️');
@@ -2820,6 +2912,7 @@ let currentPRId = null;
 let prPendingStatus = 'unpaid';
 
 function openPaymentRequestById(id) {
+  if (!isAdmin() && !hasPerm('managePayments')) { alert('You do not have permission to manage payment requests. Contact an admin.'); return; }
   const b = bookings.find(x => x.id === id);
   if (!b) return;
   currentPRId = id;
