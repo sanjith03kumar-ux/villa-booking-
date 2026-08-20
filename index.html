@@ -15,6 +15,7 @@
 <style>
   :root {
     --bg: #f7f5f0;
+    --bg-rgb: 247,245,240;
     --surface: #ffffff;
     --surface2: #f0ede6;
     --border: #e0dbd0;
@@ -41,6 +42,7 @@
   }
   body.dark-mode {
     --bg: #14181c;
+    --bg-rgb: 20,24,28;
     --surface: #1c2126;
     --surface2: #242a30;
     --border: #333a42;
@@ -129,7 +131,12 @@
   .checkbox-group label { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 400; text-transform: none; letter-spacing: normal; color: #ffffff; cursor: pointer; margin: 0; }
 
   /* APP LAYOUT */
-  #screen-app { flex-direction: column; }
+  #screen-app {
+    flex-direction: column;
+    background: linear-gradient(rgba(var(--bg-rgb),0.82), rgba(var(--bg-rgb),0.82)),
+                url('https://media-cdn.tripadvisor.com/media/photo-s/26/96/50/60/crystal-villa.jpg') center/cover no-repeat;
+    background-attachment: scroll;
+  }
   .app-header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 24px; padding-top: env(safe-area-inset-top); display: flex; align-items: center; justify-content: space-between; min-height: 60px; position: sticky; top: 0; z-index: 50; gap: 10px; }
   .app-header .brand { font-family: 'DM Serif Display', serif; font-size: 20px; color: var(--accent-fg); display: flex; align-items: center; gap: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .header-right { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
