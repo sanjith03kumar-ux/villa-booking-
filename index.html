@@ -617,6 +617,14 @@
             <option value="active">Active</option>
             <option value="past">Past</option>
           </select>
+          <select id="filter-source" onchange="renderBookingList()">
+            <option value="">All sources</option>
+            <option value="Direct">Direct</option>
+            <option value="Walk-in">Walk-in</option>
+            <option value="Booking.com">Booking.com</option>
+            <option value="Company">Company</option>
+            <option value="Complimentary">Complimentary</option>
+          </select>
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;">
           <button class="export-btn" onclick="exportExcel()">📊 Export Excel</button>
@@ -1333,9 +1341,11 @@ function renderCalendar() {
 function renderBookingList() {
   const filterRoom = document.getElementById('filter-room').value;
   const filterStatus = document.getElementById('filter-status').value;
+  const filterSource = document.getElementById('filter-source').value;
   let list = [...bookings].sort((a,b) => a.checkIn.localeCompare(b.checkIn));
   if (filterRoom) list = list.filter(b => b.room === filterRoom);
   if (filterStatus) list = list.filter(b => getStatus(b) === filterStatus);
+  if (filterSource) list = list.filter(b => (b.source || 'Direct') === filterSource);
   const grid = document.getElementById('booking-list-grid');
   if (list.length === 0) {
     grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="big">🛏️</div><p>No bookings found</p></div>`;
