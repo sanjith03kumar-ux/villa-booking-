@@ -1020,6 +1020,9 @@ function applyStateToLocal(d) {
 }
 
 // Pull the latest shared state down from Firestore and into local state.
+// cloudLoadOk stays false if the load fails, so the app can NEVER overwrite your
+// real cloud data with an empty screen (saving is blocked until a load succeeds).
+let cloudLoadOk = false;
 async function loadData() {
   try {
     const snap = await stateDocRef.get();
@@ -1029,10 +1032,17 @@ async function loadData() {
     } else {
       applyStateToLocal(snap.data());
     }
+    cloudLoadOk = true;
     lastSyncIso = new Date().toISOString();
   } catch (e) {
+    cloudLoadOk = false;
     console.error('Firebase load failed:', e);
-    alert('Could not load data from Firebase. Check your internet connection or the firebaseConfig values in the code.');
+    const code = (e && e.code) ? e.code : 'unknown';
+    if (code === 'permission-denied') {
+      alert('Firebase is BLOCKING access (Firestore security rules). Your saved data is NOT deleted - it is just hidden.\n\nFix: Firebase Console > project "crystal-villa-booking" > Firestore > Rules, then allow access to appState/main.\n\nDo not add or edit bookings until this is fixed.');
+    } else {
+      alert('Could not load data from Firebase (' + code + '). Your saved data is NOT deleted. Check your internet connection and the firebaseConfig values, then refresh. Saving is paused so nothing gets overwritten.');
+    }
     bookings = []; extraUsers = {}; auditLog = []; invoiceCounter = 0; accountsRate = 320; userPermissions = {};
   }
 }
@@ -1041,6 +1051,10 @@ async function loadData() {
 function persistState() {
   if (persistTimer) clearTimeout(persistTimer);
   persistTimer = setTimeout(async () => {
+    if (!cloudLoadOk) {
+      alert('Not saved: the app has not loaded your cloud data yet (Firebase access problem). Refresh the page after fixing Firebase - saving now would overwrite your real data.');
+      return;
+    }
     try {
       const payload = {
         bookings, extraUsers, auditLog, invoiceCounter, accountsRate, userPermissions,
@@ -1068,7 +1082,7 @@ function setupRealtimeSync() {
     if (document.getElementById('tab-schedule').style.display !== 'none') renderSchedule();
     if (document.getElementById('tab-admin').style.display !== 'none') renderAdminPanel();
     if (document.getElementById('tab-accounts').style.display !== 'none') renderAccountsPanel();
-  }, err => console.error('Firebase realtime error:', err));
+  }, err => { console.error('Firebase realtime error:', err); cloudLoadOk = cloudLoadOk && err.code !== 'permission-denied'; });
 }
 setupRealtimeSync();
 
