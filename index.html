@@ -2,20 +2,14 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover" />
-<meta name="mobile-web-app-capable" content="yes" />
-<meta name="apple-mobile-web-app-capable" content="yes" />
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-<meta name="theme-color" content="#1a4f8b" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Crystal Villa Booking</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <style>
   :root {
     --bg: #f7f5f0;
-    --bg-rgb: 247,245,240;
     --surface: #ffffff;
     --surface2: #f0ede6;
     --border: #e0dbd0;
@@ -24,80 +18,22 @@
     --text3: #9e9890;
     --accent: #2c5f3f;
     --accent-light: #e8f2ec;
-    --accent-fg: #2c5f3f;
     --accent2: #8b4513;
     --blue: #1a4f8b;
     --blue-light: #e8f0f8;
-    --blue-fg: #1a4f8b;
     --gold: #c9963a;
     --gold-light: #fdf5e6;
-    --gold-fg: #c9963a;
     --danger: #8b1a1a;
     --danger-light: #fdf0f0;
-    --danger-fg: #8b1a1a;
     --radius: 12px;
     --radius-sm: 8px;
     --shadow: 0 2px 16px rgba(0,0,0,0.08);
     --shadow-lg: 0 8px 40px rgba(0,0,0,0.12);
   }
-  body.dark-mode {
-    --bg: #14181c;
-    --bg-rgb: 20,24,28;
-    --surface: #1c2126;
-    --surface2: #242a30;
-    --border: #333a42;
-    --text: #eef0f2;
-    --text2: #a8b0b8;
-    --text3: #737c85;
-    --accent-light: #16281e;
-    --accent-fg: #6fcf97;
-    --blue-light: #142033;
-    --blue-fg: #7cb8f0;
-    --gold-light: #2c2312;
-    --gold-fg: #f0c675;
-    --danger-light: #2e1414;
-    --danger-fg: #ff8a8a;
-    --shadow: 0 2px 16px rgba(0,0,0,0.45);
-    --shadow-lg: 0 8px 40px rgba(0,0,0,0.6);
-  }
-  body.dark-mode .modal-box .form-group label { color: var(--text); }
-  body.dark-mode .pay-btn { background: var(--surface); color: var(--text); }
-  body.dark-mode .pay-btn:hover { background: var(--surface2); }
-  body.dark-mode .form-group input, body.dark-mode .form-group select { color: var(--text); }
-  body.dark-mode ::placeholder { color: var(--text3); }
-  body.dark-mode .currency-panel { background: var(--surface2); border-color: var(--border); }
-  body.dark-mode .rate-field input, body.dark-mode .rate-field select { background: var(--surface); color: var(--text); border-color: var(--border); }
-  body.dark-mode .pay-btn:hover { border-color: var(--blue-fg); background: var(--surface2); }
-  body.dark-mode #children-ages-wrap { background: var(--surface2) !important; border-color: var(--border) !important; }
-  body.dark-mode #children-ages-wrap > div:first-child { color: var(--blue-fg) !important; }
-  body.dark-mode .modal-box .form-section-title { color: var(--blue-fg); border-bottom-color: var(--blue-fg); }
-  body.dark-mode .currency-panel-title { color: var(--blue-fg); }
-  body.dark-mode #children-ages-grid label { color: var(--blue-fg) !important; }
-  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-  html { -webkit-text-size-adjust: 100%; }
-  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; transition: background 0.2s, color 0.2s; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
   .screen { display: none; min-height: 100vh; }
   .screen.active { display: flex; }
-  input, select, textarea, button { font-size: 16px; }
-  button, .icon-btn, .tab-btn, .pay-btn, .icon-action, .table-action, .export-btn, .add-btn, .modal-close, .logout-btn { touch-action: manipulation; }
-  .theme-toggle-fab { position: fixed; bottom: 20px; right: 20px; z-index: 999; width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--border); background: var(--surface); color: var(--text); font-size: 18px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: var(--shadow-lg); transition: background 0.2s, color 0.2s; }
-  .theme-toggle-fab:hover { background: var(--surface2); }
-  @media (max-width: 600px) {
-    .theme-toggle-fab { bottom: 16px; right: 16px; width: 40px; height: 40px; font-size: 16px; }
-  }
-  .room-chip-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
-  .room-chip { flex: 1; min-width: 120px; padding: 10px 12px; border: 2px solid var(--border); border-radius: var(--radius-sm); background: var(--surface); color: var(--text); font-size: 13px; font-weight: 500; font-family: 'DM Sans', sans-serif; cursor: pointer; text-align: left; transition: all 0.15s; }
-  .room-chip .rc-type { display: block; font-size: 11px; font-weight: 400; color: var(--text3); margin-top: 2px; }
-  .room-chip:hover { border-color: var(--blue); }
-  .room-chip.selected { border-color: var(--blue); background: var(--blue-light); }
-  .room-chip.taken { opacity: 0.5; cursor: not-allowed; }
-  .room-chip.taken:hover { border-color: var(--border); }
-  .schedule-filters { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
-  .schedule-chip { padding: 7px 16px; border: none; border-radius: 20px; background: var(--surface2); color: var(--text2); font-size: 13px; font-weight: 500; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: all 0.15s; }
-  .schedule-chip.active { background: var(--blue); color: #fff; }
-  .schedule-toggle { display: flex; gap: 4px; background: var(--surface2); padding: 4px; border-radius: var(--radius-sm); width: fit-content; margin-bottom: 16px; }
-  .schedule-toggle button { padding: 8px 18px; border: none; border-radius: 6px; background: transparent; color: var(--text2); font-size: 14px; font-weight: 500; font-family: 'DM Sans', sans-serif; cursor: pointer; }
-  .schedule-toggle button.active { background: var(--surface); color: var(--text); box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
 
   /* LOGIN */
   #screen-login {
@@ -116,13 +52,21 @@
   .form-group label { display: block; font-size: 12px; font-weight: 700; color: #ffffff; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
   .modal-box .form-group label { color: #1a1714; }
   .modal-box .form-section-title { color: #1a4f8b; border-bottom-color: #1a4f8b; font-size: 12px; }
-  .form-group input, .form-group select { width: 100%; padding: 10px 14px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--bg); color: var(--text); font-size: 16px; font-family: 'DM Sans', sans-serif; transition: border-color 0.2s, box-shadow 0.2s; outline: none; }
+  .form-group input, .form-group select { width: 100%; padding: 10px 14px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--bg); color: var(--text); font-size: 15px; font-family: 'DM Sans', sans-serif; transition: border-color 0.2s, box-shadow 0.2s; outline: none; }
   .form-group input:focus, .form-group select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(44,95,63,0.1); }
   .btn { width: 100%; padding: 12px; border: none; border-radius: var(--radius-sm); font-size: 15px; font-weight: 500; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: all 0.15s; display: flex; align-items: center; justify-content: center; gap: 8px; }
   .btn-primary { background: var(--accent); color: white; }
   .btn-primary:hover { background: #1e4a2e; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(44,95,63,0.3); }
-  .login-error { background: var(--danger-light); border: 1px solid #f5c0c0; border-radius: var(--radius-sm); color: var(--danger-fg); font-size: 13px; padding: 10px 14px; margin-bottom: 14px; display: none; }
+  .login-error { background: var(--danger-light); border: 1px solid #f5c0c0; border-radius: var(--radius-sm); color: var(--danger); font-size: 13px; padding: 10px 14px; margin-bottom: 14px; display: none; }
   .login-error.show { display: block; }
+  .firebase-status { font-size: 12px; margin-top: 12px; text-align: center; color: var(--text2); }
+  .firebase-status[data-state="connected"] { color: #b8f0ca; }
+  .firebase-status[data-state="saving"] { color: #ffe1a6; }
+  .firebase-status[data-state="error"] { color: #ffd0d0; }
+  .app-header .firebase-status { margin: 0; color: var(--text2); }
+  .app-header .firebase-status[data-state="connected"] { color: var(--accent); }
+  .app-header .firebase-status[data-state="saving"] { color: var(--accent2); }
+  .app-header .firebase-status[data-state="error"] { color: var(--danger); }
   .password-wrapper { position: relative; display: flex; align-items: center; width: 100%; }
   .password-wrapper input { width: 100%; padding-right: 40px; }
   .show-password-btn { position: absolute; right: 10px; background: none; border: none; cursor: pointer; color: var(--text2); font-size: 18px; padding: 4px 8px; display: flex; align-items: center; justify-content: center; }
@@ -131,15 +75,10 @@
   .checkbox-group label { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 400; text-transform: none; letter-spacing: normal; color: #ffffff; cursor: pointer; margin: 0; }
 
   /* APP LAYOUT */
-  #screen-app {
-    flex-direction: column;
-    background: linear-gradient(rgba(var(--bg-rgb),0.82), rgba(var(--bg-rgb),0.82)),
-                url('https://media-cdn.tripadvisor.com/media/photo-s/26/96/50/60/crystal-villa.jpg') center/cover no-repeat;
-    background-attachment: scroll;
-  }
-  .app-header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 24px; padding-top: env(safe-area-inset-top); display: flex; align-items: center; justify-content: space-between; min-height: 60px; position: sticky; top: 0; z-index: 50; gap: 10px; }
-  .app-header .brand { font-family: 'DM Serif Display', serif; font-size: 20px; color: var(--accent-fg); display: flex; align-items: center; gap: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .header-right { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+  #screen-app { flex-direction: column; }
+  .app-header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 24px; display: flex; align-items: center; justify-content: space-between; height: 60px; position: sticky; top: 0; z-index: 50; }
+  .app-header .brand { font-family: 'DM Serif Display', serif; font-size: 20px; color: var(--accent); display: flex; align-items: center; gap: 8px; }
+  .header-right { display: flex; align-items: center; gap: 12px; }
   .user-badge { display: flex; align-items: center; gap: 8px; padding: 6px 12px; background: var(--surface2); border-radius: 20px; font-size: 13px; font-weight: 500; }
   .user-avatar { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: white; }
   .logout-btn { padding: 6px 14px; border: 1px solid var(--border); border-radius: 20px; background: transparent; color: var(--text2); font-size: 13px; font-family: 'DM Sans', sans-serif; cursor: pointer; }
@@ -177,12 +116,12 @@
   .cal-table td:last-child { border-right: none; }
   .cal-table tr:last-child td { border-bottom: none; }
   .cal-table td.day-cell { font-size: 13px; font-weight: 500; color: var(--text2); background: var(--surface2); width: 52px; }
-  .cal-table tr.today-row td.day-cell { color: var(--accent-fg); font-weight: 700; background: var(--accent-light); }
+  .cal-table tr.today-row td.day-cell { color: var(--accent); font-weight: 700; background: var(--accent-light); }
   .room-td { cursor: pointer; transition: background 0.1s; }
   .room-td:hover { background: var(--surface2); }
   .pill { display: block; padding: 3px 6px; border-radius: 5px; font-size: 11px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; max-width: 100%; }
-  .pill.upcoming { background: var(--blue-light); color: var(--blue-fg); }
-  .pill.active { background: var(--accent-light); color: var(--accent-fg); }
+  .pill.upcoming { background: var(--blue-light); color: var(--blue); }
+  .pill.active { background: var(--accent-light); color: var(--accent); }
   .pill.past { background: var(--surface2); color: var(--text3); }
 
   /* BOOKING LIST */
@@ -201,7 +140,7 @@
   .card-actions { display: flex; gap: 6px; }
   .icon-action { width: 30px; height: 30px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; color: var(--text2); transition: all 0.15s; }
   .icon-action:hover { background: var(--surface2); color: var(--text); }
-  .icon-action.del:hover { background: var(--danger-light); color: var(--danger-fg); border-color: #f5c0c0; }
+  .icon-action.del:hover { background: var(--danger-light); color: var(--danger); border-color: #f5c0c0; }
   .empty-state { text-align: center; padding: 3rem; color: var(--text2); }
   .empty-state .big { font-size: 48px; margin-bottom: 12px; }
   .empty-state p { font-size: 15px; }
@@ -215,7 +154,7 @@
   .modal-header h3 { font-family: 'DM Serif Display', serif; font-size: 20px; color: var(--text); }
   .modal-close { width: 32px; height: 32px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: transparent; cursor: pointer; font-size: 18px; color: var(--text2); display: flex; align-items: center; justify-content: center; }
   .modal-close:hover { background: var(--surface2); }
-  .form-error { background: var(--danger-light); border: 1px solid #f5c0c0; color: var(--danger-fg); font-size: 13px; padding: 8px 12px; border-radius: var(--radius-sm); margin-bottom: 12px; display: none; }
+  .form-error { background: var(--danger-light); border: 1px solid #f5c0c0; color: var(--danger); font-size: 13px; padding: 8px 12px; border-radius: var(--radius-sm); margin-bottom: 12px; display: none; }
   .form-error.show { display: block; }
   .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 1.25rem; flex-wrap: wrap; }
   .btn-sm { padding: 9px 20px; border-radius: var(--radius-sm); font-size: 14px; font-weight: 500; font-family: 'DM Sans', sans-serif; cursor: pointer; border: 1px solid var(--border); background: transparent; color: var(--text2); transition: all 0.15s; }
@@ -224,7 +163,7 @@
   .btn-sm.primary:hover { background: #1e4a2e; }
   .btn-sm.invoice { background: var(--blue); color: white; border-color: var(--blue); }
   .btn-sm.invoice:hover { background: #133a6b; }
-  .nights-display { background: var(--accent-light); color: var(--accent-fg); font-size: 13px; font-weight: 500; padding: 8px 12px; border-radius: var(--radius-sm); margin-top: 8px; display: none; }
+  .nights-display { background: var(--accent-light); color: var(--accent); font-size: 13px; font-weight: 500; padding: 8px 12px; border-radius: var(--radius-sm); margin-top: 8px; display: none; }
 
   /* CURRENCY CONVERTER PANEL */
   .currency-panel { background: #f0f4ff; border: 1px solid #c5d3f0; border-radius: var(--radius-sm); padding: 12px 14px; margin-bottom: 14px; }
@@ -245,8 +184,8 @@
   /* STATUS BADGES */
   .pay-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; padding: 2px 8px; border-radius: 10px; font-weight: 500; }
   .status-dot { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; padding: 2px 8px; border-radius: 10px; }
-  .status-dot.upcoming { background: var(--blue-light); color: var(--blue-fg); }
-  .status-dot.active { background: var(--accent-light); color: var(--accent-fg); }
+  .status-dot.upcoming { background: var(--blue-light); color: var(--blue); }
+  .status-dot.active { background: var(--accent-light); color: var(--accent); }
   .status-dot.past { background: var(--surface2); color: var(--text3); }
 
   /* FORM GRID */
@@ -254,34 +193,22 @@
   .form-section-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text3); border-bottom: 1px solid var(--border); padding-bottom: 6px; margin: 16px 0 10px; }
 
   /* EXPORT */
-  .export-btn { padding: 8px 16px; background: var(--gold-light); color: var(--gold-fg); border: 1px solid #f0d9a8; border-radius: var(--radius-sm); font-size: 13px; font-weight: 500; font-family: 'DM Sans', sans-serif; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.15s; }
+  .export-btn { padding: 8px 16px; background: var(--gold-light); color: var(--gold); border: 1px solid #f0d9a8; border-radius: var(--radius-sm); font-size: 13px; font-weight: 500; font-family: 'DM Sans', sans-serif; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.15s; }
   .export-btn:hover { background: #faecd6; }
 
   /* ADMIN PANEL */
   .admin-section { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 20px; }
-  .admin-section h4 { font-family: 'DM Serif Display', serif; font-size: 18px; color: var(--blue-fg); margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+  .admin-section h4 { font-family: 'DM Serif Display', serif; font-size: 18px; color: var(--blue); margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
   .user-table { width: 100%; border-collapse: collapse; }
   .user-table th { padding: 10px 12px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text3); background: var(--surface2); border-bottom: 1px solid var(--border); text-align: left; }
   .user-table td { padding: 10px 12px; font-size: 14px; border-bottom: 1px solid var(--border); color: var(--text); }
   .user-table tr:last-child td { border-bottom: none; }
   .role-badge { display: inline-flex; padding: 2px 10px; border-radius: 10px; font-size: 11px; font-weight: 600; }
   .role-badge.admin { background: #fdf5e6; color: #c9963a; }
-  .role-badge.staff { background: var(--blue-light); color: var(--blue-fg); }
-  /* Permission toggle switches */
-  .perm-table { width: 100%; border-collapse: collapse; }
-  .perm-table th, .perm-table td { padding: 10px 8px; border-bottom: 1px solid var(--border); font-size: 12.5px; text-align: left; vertical-align: middle; }
-  .perm-table th { font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text3); font-weight: 700; }
-  .perm-switch { position: relative; display: inline-block; width: 38px; height: 21px; vertical-align: middle; }
-  .perm-switch input { opacity: 0; width: 0; height: 0; }
-  .perm-switch .slider { position: absolute; cursor: pointer; inset: 0; background: #d5d1c8; transition: .15s; border-radius: 21px; }
-  .perm-switch .slider:before { position: absolute; content: ""; height: 15px; width: 15px; left: 3px; bottom: 3px; background: white; transition: .15s; border-radius: 50%; }
-  .perm-switch input:checked + .slider { background: var(--accent, #2c5f3f); }
-  .perm-switch input:checked + .slider:before { transform: translateX(17px); }
-  .perm-switch input:disabled + .slider { opacity: .4; cursor: not-allowed; }
-  .perm-admin-note { font-size: 11px; color: var(--text3); }
+  .role-badge.staff { background: var(--blue-light); color: var(--blue); }
   .table-action { padding: 4px 12px; border: 1px solid var(--border); border-radius: 6px; background: transparent; cursor: pointer; font-size: 12px; font-family: 'DM Sans', sans-serif; color: var(--text2); transition: all 0.15s; }
   .table-action:hover { background: var(--surface2); }
-  .table-action.del { color: var(--danger-fg); }
+  .table-action.del { color: var(--danger); }
   .table-action.del:hover { background: var(--danger-light); border-color: #f5c0c0; }
 
   /* AUDIT LOG */
@@ -289,65 +216,28 @@
   .audit-item { background: var(--surface2); border-radius: var(--radius-sm); padding: 10px 14px; font-size: 13px; display: flex; gap: 12px; align-items: flex-start; }
   .audit-icon { font-size: 18px; flex-shrink: 0; }
   .audit-body { flex: 1; }
-  .audit-user { font-weight: 700; color: var(--blue-fg); }
+  .audit-user { font-weight: 700; color: var(--blue); }
   .audit-time { font-size: 11px; color: var(--text3); margin-top: 2px; }
   .audit-filter-bar { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
   .audit-filter-bar select { padding: 6px 12px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: white; color: var(--text); font-size: 13px; font-family: 'DM Sans', sans-serif; outline: none; }
  
   /* ADD USER FORM */
   .add-user-form { background: var(--surface2); border-radius: var(--radius-sm); padding: 16px; margin-top: 14px; }
-  .add-user-form h5 { font-size: 13px; font-weight: 700; color: var(--blue-fg); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .add-user-form h5 { font-size: 13px; font-weight: 700; color: var(--blue); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.05em; }
   .add-user-row { display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 10px; align-items: end; }
   .add-user-row input, .add-user-row select { padding: 8px 12px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: white; color: var(--text); font-size: 14px; font-family: 'DM Sans', sans-serif; outline: none; width: 100%; }
   .add-user-row input:focus { border-color: var(--accent); }
 
   /* ACCESS DENIED */
-  .access-denied { background: var(--danger-light); border: 1px solid #f5c0c0; color: var(--danger-fg); border-radius: var(--radius); padding: 20px; text-align: center; font-size: 15px; }
+  .access-denied { background: var(--danger-light); border: 1px solid #f5c0c0; color: var(--danger); border-radius: var(--radius); padding: 20px; text-align: center; font-size: 15px; }
 
   /* INVOICE PRINT */
   #invoice-modal .modal-box { max-width: 800px; }
-  @page { size: A4 portrait; margin: 10mm; }
   @media print {
-    html, body { width: 100%; height: auto !important; min-height: 0 !important; background: #fff !important; overflow: visible !important; margin: 0 !important; }
     body * { visibility: hidden; }
-    #print-area, #print-area *, #pr-print-area, #pr-print-area *, #guest-pay-content, #guest-pay-content * { visibility: visible; }
-
-    /* CRITICAL: fully remove the app screens and every OTHER modal from the print
-       flow. Without this, #screen-app (min-height:100vh) and the closed booking /
-       cancel / user modals still take up layout space (just invisible), which is
-       what was pushing the invoice onto extra blank pages and misaligning it on A4. */
-    #screen-login, #screen-app { display: none !important; }
-    #modal-overlay, #cancel-modal, #user-modal { display: none !important; }
-
-    /* IMPORTANT: static (not fixed) positioning — fixed elements paginate incorrectly
-       on mobile browsers and cause a stray/blank second page. Only the modal that is
-       actually open (.open) should be forced visible/in-flow for print. */
-    #invoice-modal.open, #payment-request-modal.open { position: static !important; display: block !important; overflow: visible !important; height: auto !important; min-height: 0 !important; background: none !important; padding: 0 !important; margin: 0 !important; }
-    #invoice-modal.open .modal-box, #payment-request-modal.open .modal-box { position: static !important; max-width: 100% !important; width: 100% !important; max-height: none !important; overflow: visible !important; box-shadow: none !important; border: none !important; padding: 0 !important; margin: 0 !important; }
-    #print-area, #pr-print-area { position: static !important; width: 100% !important; max-width: 100% !important; padding: 0 !important; margin: 0 !important; background: white; }
+    #print-area, #print-area * { visibility: visible; }
+    #print-area { position: fixed; top: 0; left: 0; width: 100%; padding: 20px; margin: 0; background: white; }
     .no-print { display: none !important; }
-
-    /* Guest-facing public payment page prints just its invoice content, full width */
-    #screen-pay.active { position: static !important; display: block !important; height: auto !important; min-height: 0 !important; background: #fff !important; padding: 0 !important; }
-    #screen-pay .pay-page-wrap, #screen-pay .pay-page-card { position: static !important; width: 100% !important; max-width: 100% !important; box-shadow: none !important; padding: 0 !important; margin: 0 !important; }
-
-    /* Force the proper multi-column invoice layout for print, regardless of the
-       phone's narrow screen width (mobile media queries below must not leak into print) */
-    .invoice-wrap, .pf-wrap { font-size: 11px !important; line-height: 1.4 !important; width: 100% !important; }
-    .inv-header { flex-direction: row !important; align-items: center !important; justify-content: space-between !important; gap: 12px !important; }
-    .inv-title-block { text-align: right !important; }
-    .inv-grid { grid-template-columns: 1fr 1fr !important; }
-    .inv-grid-3 { grid-template-columns: 1fr 1fr 1fr !important; }
-    .inv-charges-table, .pf-table { display: table !important; width: 100% !important; white-space: normal !important; overflow: visible !important; }
-    .inv-sign-grid { grid-template-columns: 1fr 1fr !important; gap: 20px !important; }
-    .pf-meta-row { flex-direction: row !important; }
-
-    /* Keep related content together instead of splitting awkwardly across pages */
-    .inv-header, .inv-section, .inv-charges-table tr, .inv-terms, .inv-sign-grid, .inv-footer,
-    .pf-title-strip, .pf-table tr, .pf-status-banner, .pf-bank-box, .pf-footer {
-      page-break-inside: avoid; break-inside: avoid;
-    }
-    .inv-terms { page-break-before: auto; }
   }
 
   .invoice-wrap { font-family: 'DM Sans', sans-serif; color: #1a1714; font-size: 12px; line-height: 1.5; }
@@ -382,128 +272,17 @@
   .inv-footer { text-align: center; margin-top: 10px; font-size: 10px; color: #888; border-top: 1px solid #e0dbd0; padding-top: 8px; }
   .inv-amount-words { font-size: 11px; color: #444; font-style: italic; margin-top: 4px; }
 
-  /* ═══════ PROFORMA / PAYMENT REQUEST INVOICE ═══════ */
-  #payment-request-modal .modal-box { max-width: 800px; }
-  .pf-wrap { font-family: 'DM Sans', sans-serif; color: #1a1714; font-size: 12px; line-height: 1.5; }
-  .pf-title-strip { text-align: center; background: #1a4f8b; color: #fff; font-family: 'DM Serif Display', serif; font-size: 18px; letter-spacing: 0.08em; padding: 8px; border-radius: 4px; margin-bottom: 12px; }
-  .pf-meta-row { display: flex; justify-content: space-between; gap: 12px; font-size: 12px; margin-bottom: 4px; flex-wrap: wrap; }
-  .pf-meta-row strong { color: #1a4f8b; }
-  .pf-guest-line { font-size: 13px; margin: 10px 0 12px; }
-  .pf-guest-line strong { color: #1a4f8b; }
-  .pf-table { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
-  .pf-table th { background: #1a4f8b; color: #fff; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; padding: 7px 10px; border: 1px solid #1a4f8b; text-align: left; }
-  .pf-table td { padding: 8px 10px; border: 1px solid #ccc; font-size: 12px; vertical-align: top; }
-  .pf-table td.pf-details-cell div { margin-bottom: 4px; }
-  .pf-table tr.pf-total-row td { background: #e8f0f8; font-weight: 700; color: #1a4f8b; font-size: 13px; }
-  .pf-amount-words { font-size: 11px; color: #444; font-style: italic; margin: 8px 0 14px; }
-  .pf-status-banner { display: flex; align-items: center; gap: 8px; border-radius: 6px; padding: 10px 14px; font-size: 13px; font-weight: 700; margin-bottom: 14px; }
-  .pf-status-banner.unpaid { background: var(--danger-light); color: var(--danger-fg); border: 1px solid #f5c0c0; }
-  .pf-status-banner.advance { background: var(--gold-light); color: #8a6414; border: 1px solid #f0d9a8; }
-  .pf-status-banner.paid { background: var(--accent-light); color: var(--accent-fg); border: 1px solid #bfe0cc; }
-  .pf-bank-box { background: #f7f5f0; border: 1px solid #e0dbd0; border-radius: 4px; padding: 10px 14px; margin-bottom: 10px; }
-  .pf-bank-box h4 { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #1a4f8b; margin-bottom: 6px; }
-  .pf-bank-box p { font-size: 11.5px; color: #333; margin: 1px 0; }
-  .pf-note { font-size: 10.5px; color: #666; font-weight: 600; text-align: center; margin-top: 10px; padding-top: 8px; border-top: 1px dashed #ccc; }
-  .pf-footer { text-align: center; margin-top: 12px; font-size: 10px; color: #888; border-top: 1px solid #e0dbd0; padding-top: 8px; }
-  .pf-admin-panel { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px; margin-bottom: 16px; }
-  .pf-admin-panel .form-row { margin-bottom: 10px; }
-  .pf-admin-panel label { display:block; font-size: 11px; font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 5px; }
-  .pf-status-pick { display: flex; gap: 8px; flex-wrap: wrap; }
-  .pf-status-pick button { flex: 1; min-width: 100px; padding: 8px 10px; border: 2px solid var(--border); border-radius: var(--radius-sm); background: var(--surface); color: var(--text); font-size: 12.5px; font-weight: 600; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: all .15s; }
-  .pf-status-pick button.selected.unpaid { border-color: var(--danger-fg); background: var(--danger-light); color: var(--danger-fg); }
-  .pf-status-pick button.selected.advance { border-color: #c9963a; background: var(--gold-light); color: #8a6414; }
-  .pf-status-pick button.selected.paid { border-color: var(--accent-fg); background: var(--accent-light); color: var(--accent-fg); }
-  .pf-card-badge { font-size: 10.5px; font-weight: 700; padding: 2px 9px; border-radius: 10px; white-space: nowrap; }
-  .pf-card-badge.unpaid { background: var(--danger-light); color: var(--danger-fg); }
-  .pf-card-badge.advance { background: var(--gold-light); color: #8a6414; }
-  .pf-card-badge.paid { background: var(--accent-light); color: var(--accent-fg); }
-  #link-copied-toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(20px); background: #1a1714; color: #fff; padding: 10px 20px; border-radius: 30px; font-size: 13px; font-weight: 500; box-shadow: var(--shadow-lg); z-index: 999; opacity: 0; pointer-events: none; transition: all .25s; }
-  #link-copied-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-
-  /* GUEST-FACING PUBLIC PAYMENT PAGE */
-  #screen-pay { background: var(--bg); align-items: flex-start; justify-content: center; padding: 24px 16px 60px; }
-  .pay-page-wrap { width: 100%; max-width: 800px; }
-  .pay-page-actions { display: flex; gap: 10px; justify-content: center; margin-bottom: 18px; flex-wrap: wrap; }
-  .pay-page-card { background: #fff; border-radius: var(--radius); box-shadow: var(--shadow-lg); padding: 24px; }
-  .pay-page-error { text-align: center; padding: 3rem 1.5rem; color: var(--text2); }
-
-  @media (max-width: 700px) {
-    #payment-request-modal .modal-box { max-width: 100%; padding: 1rem; }
-    .pf-meta-row { flex-direction: column; gap: 2px; }
-  }
-
-  /* ═══════ RESPONSIVE / MOBILE ═══════ */
-  @media (max-width: 768px) {
-    .app-body { padding: 14px; }
-    .app-header { padding: 0 14px; }
-    .app-header .brand { font-size: 17px; }
-    .stats-grid { grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; }
-    .stat-card { padding: 12px; }
-    .stat-card .s-val { font-size: 22px; }
-    .topbar { flex-direction: column; align-items: stretch; }
-    .topbar .nav-btns { justify-content: space-between; }
-    .topbar > div[style*="display:flex"] { width: 100%; }
+  @media (max-width: 600px) {
+    .app-body { padding: 12px; }
+    .app-header { padding: 0 12px; }
+    .topbar { flex-direction: column; align-items: flex-start; }
     .form-row { grid-template-columns: 1fr; }
     .currency-rate-grid { grid-template-columns: 1fr; }
     .add-user-row { grid-template-columns: 1fr; }
-    .add-user-row .table-action, .add-user-row button { width: 100%; }
-    .modal-box { padding: 1.25rem; max-height: 96vh; border-radius: var(--radius-sm); }
-    .modal-actions { flex-direction: column-reverse; }
-    .modal-actions .btn-sm { width: 100%; padding: 12px; }
-    .payment-methods { gap: 6px; }
-    .pay-btn { min-width: 80px; font-size: 12px; padding: 8px 6px; }
-    .bk-grid { grid-template-columns: 1fr; }
-    .user-table-wrap, .admin-section { overflow-x: auto; }
-    .user-table { min-width: 480px; }
-    .add-user-row { align-items: stretch; }
-    .rate-field input, .rate-field select, .filter-bar select, .audit-filter-bar select, .add-user-row input, .add-user-row select { font-size: 16px; }
-  }
-
-  @media (max-width: 480px) {
-    .login-container { max-width: 100%; }
-    .login-card { padding: 1.25rem; }
-    .login-brand h1 { font-size: 2.1rem; }
-    .app-header { height: auto; min-height: 56px; padding: 8px 10px; }
-    .app-header .brand { font-size: 15px; gap: 6px; }
-    .app-header .brand svg { width: 26px; height: 26px; flex-shrink: 0; }
-    .header-right { gap: 6px; }
-    .user-badge span#user-name-display { display: none; }
-    .user-badge { padding: 5px 8px; }
-    .logout-btn { padding: 6px 10px; font-size: 12px; }
-    .app-body { padding: 10px; }
-    .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
-    .tabs { width: 100%; overflow-x: auto; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; }
-    .tab-btn { padding: 8px 12px; font-size: 13px; white-space: nowrap; }
-    .month-title { font-size: 16px; }
-    .add-btn, .export-btn { padding: 9px 14px; font-size: 13px; flex: 1; justify-content: center; }
-    .topbar > div[style*="display:flex"] { flex-wrap: nowrap; }
-    .cal-wrap { border-radius: var(--radius-sm); }
-    .cal-table th, .cal-table td { padding: 3px 4px; font-size: 12px; }
-    .modal-header h3 { font-size: 17px; }
-    .form-section-title { font-size: 10px; margin: 12px 0 8px; }
-    .currency-panel { padding: 10px; }
-  }
-
-  /* Invoice preview readability on small screens (screen only, not print) */
-  @media (max-width: 700px) {
-    #invoice-modal .modal-box { max-width: 100%; padding: 1rem; }
-    .modal-header.no-print { flex-direction: column; align-items: stretch; gap: 10px; }
-    .modal-header.no-print > div { display: flex; gap: 8px; }
-    .modal-header.no-print .btn-sm { flex: 1; }
-    .inv-header { flex-direction: column; align-items: flex-start; gap: 12px; }
-    .inv-title-block { text-align: left; }
-    .inv-grid, .inv-grid-3 { grid-template-columns: 1fr 1fr; }
-    .inv-sign-grid { grid-template-columns: 1fr; gap: 24px; }
-    .inv-charges-table { display: block; overflow-x: auto; white-space: nowrap; }
-  }
-
-  @media (max-width: 420px) {
-    .inv-grid, .inv-grid-3 { grid-template-columns: 1fr; }
   }
 </style>
 </head>
 <body>
-<button id="theme-toggle-btn" class="theme-toggle-fab" onclick="toggleTheme()" title="Toggle dark / light mode">🌙</button>
 
 <!-- LOGIN SCREEN -->
 <div id="screen-login" class="screen active">
@@ -532,19 +311,7 @@
         <label for="save-password-check">Save password</label>
       </div>
       <button class="btn btn-primary" onclick="loginWithPassword()">Sign in</button>
-    </div>
-  </div>
-</div>
-
-<!-- GUEST PAYMENT REQUEST PUBLIC PAGE (opened via shared payment link, no login required) -->
-<div id="screen-pay" class="screen">
-  <div class="pay-page-wrap">
-    <div class="pay-page-actions no-print">
-      <button class="btn-sm primary" id="guest-download-pdf-btn" onclick="downloadGuestPaymentPDF()">📥 Download PDF</button>
-      <button class="btn-sm" onclick="window.print()">🖨️ Print</button>
-    </div>
-    <div class="pay-page-card">
-      <div id="guest-pay-content"></div>
+      <div class="firebase-status" data-state="connecting" role="status" aria-live="polite">Firebase: connecting…</div>
     </div>
   </div>
 </div>
@@ -565,6 +332,7 @@
       CRYSTAL VILLA BOOKING
     </div>
     <div class="header-right">
+      <div class="firebase-status" data-state="connecting" role="status" aria-live="polite">Firebase: connecting…</div>
       <div class="user-badge">
         <div class="user-avatar" id="user-avatar">P1</div>
         <span id="user-name-display">Partner 1</span>
@@ -579,9 +347,7 @@
     <div class="tabs" id="main-tabs">
       <button class="tab-btn active" onclick="switchTab('calendar', this)">📅 Calendar</button>
       <button class="tab-btn" onclick="switchTab('bookings', this)">📋 All Bookings</button>
-      <button class="tab-btn" onclick="switchTab('schedule', this)">🛎️ Arrivals/Departures</button>
       <button class="tab-btn admin-only-tab" onclick="switchTab('admin', this)" style="display:none;">⚙️ Admin</button>
-      <button class="tab-btn accounts-tab" onclick="switchTab('accounts', this)" style="display:none;">💼 Accounts</button>
     </div>
 
 
@@ -617,14 +383,6 @@
             <option value="active">Active</option>
             <option value="past">Past</option>
           </select>
-          <select id="filter-source" onchange="renderBookingList()">
-            <option value="">All sources</option>
-            <option value="Direct">Direct</option>
-            <option value="Walk-in">Walk-in</option>
-            <option value="Booking.com">Booking.com</option>
-            <option value="Company">Company</option>
-            <option value="Complimentary">Complimentary</option>
-          </select>
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;">
           <button class="export-btn" onclick="exportExcel()">📊 Export Excel</button>
@@ -634,32 +392,9 @@
       <div id="booking-list-grid" class="bk-grid"></div>
     </div>
 
-    <!-- Arrivals/Departures Tab -->
-    <div id="tab-schedule" style="display:none;">
-      <div class="schedule-toggle" id="schedule-toggle">
-        <button class="active" onclick="setScheduleView('checkin', this)">🛬 Arrivals (Check-ins)</button>
-        <button onclick="setScheduleView('checkout', this)">🛫 Departures (Check-outs)</button>
-      </div>
-      <div class="schedule-filters" id="schedule-filters">
-        <button class="schedule-chip" data-range="yesterday" onclick="setScheduleRange('yesterday', this)">Yesterday</button>
-        <button class="schedule-chip active" data-range="today" onclick="setScheduleRange('today', this)">Today</button>
-        <button class="schedule-chip" data-range="tomorrow" onclick="setScheduleRange('tomorrow', this)">Tomorrow</button>
-        <button class="schedule-chip" data-range="next7" onclick="setScheduleRange('next7', this)">Next 7 Days</button>
-        <button class="schedule-chip" data-range="next30" onclick="setScheduleRange('next30', this)">Next 30 Days</button>
-        <button class="schedule-chip" data-range="future" onclick="setScheduleRange('future', this)">All Future</button>
-        <button class="schedule-chip" data-range="all" onclick="setScheduleRange('all', this)">All</button>
-      </div>
-      <div id="schedule-list-grid" class="bk-grid"></div>
-    </div>
-
     <!-- Admin Tab (partner1 only) -->
     <div id="tab-admin" style="display:none;">
       <div id="admin-content"></div>
-    </div>
-
-    <!-- Accounts Tab (Admin only) -->
-    <div id="tab-accounts" style="display:none;">
-      <div id="accounts-content"></div>
     </div>
   </div>
 </div>
@@ -700,16 +435,11 @@
     </div>
 
     <div class="form-section-title">Booking Details</div>
-    <div class="form-group" id="room-select-single-wrap" style="display:none;">
+    <div class="form-group">
       <label>Room</label>
       <select id="f-room">
         <option value="">Select a room</option>
       </select>
-    </div>
-    <div class="form-group" id="room-select-multi-wrap">
-      <label>Room(s) — tap to select one or more</label>
-      <div class="room-chip-grid" id="room-chip-grid"></div>
-      <div style="font-size:11px;color:var(--text3);margin-top:6px;">Selecting multiple rooms creates one linked booking per room, for the same guest and dates.</div>
     </div>
     <div class="form-row">
       <div class="form-group">
@@ -764,20 +494,13 @@
 
     <div class="form-section-title">💰 Pricing &amp; Currency</div>
     <div class="currency-panel">
-      <div class="currency-panel-title">💱 Guest Type &amp; Pricing</div>
-      <div class="form-group" style="margin-bottom:12px;">
-        <label>Guest Type</label>
-        <select id="f-guest-type" onchange="onGuestTypeChange()">
-          <option value="foreign">🌍 Foreign Guest (needs conversion rate)</option>
-          <option value="local">🇱🇰 Local Guest (LKR only, no conversion)</option>
-        </select>
-      </div>
+      <div class="currency-panel-title">💱 Currency &amp; Conversion Rate</div>
       <div class="currency-rate-grid">
         <div class="rate-field">
-          <label id="price-field-label">Rate / Night (USD $)</label>
+          <label>Rate / Night (USD $)</label>
           <input type="number" id="f-price-usd" placeholder="0.00" min="0" step="0.01" oninput="recalcFromUSD()" />
         </div>
-        <div class="rate-field" id="guest-currency-field">
+        <div class="rate-field">
           <label>Guest Currency</label>
           <select id="f-currency" onchange="onCurrencyChange()">
             <option value="LKR" data-rate="320">🇱🇰 LKR – Sri Lankan Rupee</option>
@@ -802,7 +525,7 @@
             <option value="DKK" data-rate="6.9">🇩🇰 DKK – Danish Krone</option>
           </select>
         </div>
-        <div class="rate-field" id="exchange-rate-field">
+        <div class="rate-field">
           <label>Exchange Rate (1 USD =)</label>
           <input type="number" id="f-rate" placeholder="320" min="0.01" step="0.01" oninput="recalcFromRate()" />
         </div>
@@ -844,59 +567,13 @@
     <div class="modal-header no-print">
       <h3>Guest Registration &amp; Invoice</h3>
       <div style="display:flex;gap:8px;">
-        <button class="btn-sm primary" id="download-pdf-btn" onclick="downloadInvoicePDF()">📥 Download PDF</button>
-        <button class="btn-sm" onclick="printInvoice()">🖨️ Print</button>
+        <button class="btn-sm primary" onclick="printInvoice()">🖨️ Print / Save as PDF</button>
         <button class="modal-close" onclick="closeInvoice()">✕</button>
       </div>
     </div>
     <div id="print-area"></div>
   </div>
 </div>
-
-<!-- PAYMENT REQUEST / PROFORMA INVOICE MODAL -->
-<div id="payment-request-modal" class="modal-overlay" onclick="if(event.target===this)closePaymentRequest()">
-  <div class="modal-box" style="max-width:800px;">
-    <div class="modal-header no-print">
-      <h3>💳 Guest Payment Request</h3>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;">
-        <button class="btn-sm primary" id="pr-download-pdf-btn" onclick="downloadPaymentRequestPDF()">📥 Download PDF</button>
-        <button class="btn-sm" onclick="printPaymentRequest()">🖨️ Print</button>
-        <button class="modal-close" onclick="closePaymentRequest()">✕</button>
-      </div>
-    </div>
-
-    <div class="pf-admin-panel no-print">
-      <div class="form-row" style="grid-template-columns:1fr;">
-        <div>
-          <label>Payment Status</label>
-          <div class="pf-status-pick" id="pr-status-pick">
-            <button type="button" data-status="unpaid" onclick="setPRStatus('unpaid')">🔴 Not Paid</button>
-            <button type="button" data-status="advance" onclick="setPRStatus('advance')">🟡 Advance Paid</button>
-            <button type="button" data-status="paid" onclick="setPRStatus('paid')">🟢 Fully Paid</button>
-          </div>
-        </div>
-      </div>
-      <div class="form-row">
-        <div class="form-group" id="pr-advance-wrap" style="display:none;margin-bottom:0;">
-          <label>Advance Amount Received</label>
-          <input type="number" id="pr-advance-amount" placeholder="0.00" step="0.01" min="0" />
-        </div>
-        <div class="form-group" style="margin-bottom:0;">
-          <label>Remark (shown on the invoice)</label>
-          <input type="text" id="pr-remark" placeholder="e.g. Advance to confirm booking" />
-        </div>
-      </div>
-      <div class="modal-actions" style="margin-top:12px;">
-        <button class="btn-sm primary" onclick="savePRStatus()">💾 Save Status</button>
-        <button class="btn-sm invoice" onclick="copyPaymentLink()">🔗 Copy Payment Link for Guest</button>
-      </div>
-    </div>
-
-    <div id="pr-print-area"></div>
-  </div>
-</div>
-
-<div id="link-copied-toast">🔗 Payment link copied to clipboard!</div>
 
 <!-- CANCEL MODAL -->
 <div id="cancel-modal" class="modal-overlay" onclick="if(event.target===this)closeCancelModal()">
@@ -920,20 +597,6 @@
     <div class="modal-actions">
       <button class="btn-sm" onclick="closeCancelModal()">Close</button>
       <button class="btn-sm primary" onclick="confirmCancelBooking()">Confirm Cancel</button>
-    </div>
-  </div>
-</div>
-
-<!-- TODAY'S ARRIVALS POPUP -->
-<div id="today-arrivals-modal" class="modal-overlay" onclick="if(event.target===this)closeTodayArrivalsModal()">
-  <div class="modal-box" style="max-width:480px;">
-    <div class="modal-header">
-      <h3>🔔 Today We have a Booking</h3>
-      <button class="modal-close" onclick="closeTodayArrivalsModal()">✕</button>
-    </div>
-    <div id="today-arrivals-list" style="display:flex;flex-direction:column;gap:10px;max-height:60vh;overflow-y:auto;"></div>
-    <div class="modal-actions">
-      <button class="btn-sm primary" onclick="closeTodayArrivalsModal()">Got it</button>
     </div>
   </div>
 </div>
@@ -997,102 +660,121 @@ const firebaseConfig = {
   measurementId: "G-2KJXVFVPHR"
 };
 
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
-const stateDocRef = db.collection('appState').doc('main');
+function setFirebaseStatus(message, status) {
+  document.querySelectorAll('.firebase-status').forEach(el => {
+    el.textContent = `Firebase: ${message}`;
+    el.dataset.state = status;
+  });
+}
+
+let db = null;
+let stateDocRef = null;
+let firebaseReady = false;
+try {
+  if (typeof firebase === 'undefined') throw new Error('Firebase SDK did not load.');
+  if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+  db = firebase.firestore();
+  stateDocRef = db.collection('appState').doc('main');
+  firebaseReady = true;
+} catch (e) {
+  console.error('Firebase initialization failed:', e);
+  setFirebaseStatus('unavailable; check Firebase configuration and SDK access', 'error');
+}
 
 let lastSyncIso = null;
 let persistTimer = null;
-let suppressNextSnapshot = false; // avoids a flicker right after our own write
+let dataLoadSucceeded = false;
+let invoiceLogo = null;
 
-const EMPTY_STATE = { bookings: [], extraUsers: {}, auditLog: [], invoiceCounter: 0, invoiceLogo: null, accountsRate: 320, userPermissions: {} };
-let accountsRate = 320;
+const EMPTY_STATE = { bookings: [], extraUsers: {}, auditLog: [], invoiceCounter: 0, invoiceLogo: null };
 
 function applyStateToLocal(d) {
   bookings = Array.isArray(d.bookings) ? d.bookings : [];
-  extraUsers = d.extraUsers || {};
+  extraUsers = d.extraUsers && typeof d.extraUsers === 'object' ? d.extraUsers : {};
   auditLog = Array.isArray(d.auditLog) ? d.auditLog : [];
-  invoiceCounter = d.invoiceCounter || 0;
-  accountsRate = parseFloat(d.accountsRate) || 320;
-  userPermissions = d.userPermissions || {};
-  if (d.invoiceLogo) localStorage.setItem('cvInvoiceLogo', d.invoiceLogo);
-  else localStorage.removeItem('cvInvoiceLogo');
+  invoiceCounter = Number.isFinite(Number(d.invoiceCounter)) ? Number(d.invoiceCounter) : 0;
+  invoiceLogo = typeof d.invoiceLogo === 'string' ? d.invoiceLogo : null;
 }
 
 // Pull the latest shared state down from Firestore and into local state.
-// cloudLoadOk stays false if the load fails, so the app can NEVER overwrite your
-// real cloud data with an empty screen (saving is blocked until a load succeeds).
-let cloudLoadOk = false;
 async function loadData() {
+  if (!firebaseReady) {
+    dataLoadSucceeded = false;
+    setFirebaseStatus('unavailable; check Firebase configuration and SDK access', 'error');
+    showLoginError('Firebase is unavailable. Check the connection and Firebase configuration, then reload.');
+    return false;
+  }
+  setFirebaseStatus('connecting…', 'connecting');
   try {
-    const snap = await stateDocRef.get();
-    if (!snap.exists) {
-      await stateDocRef.set(EMPTY_STATE);
-      applyStateToLocal(EMPTY_STATE);
-    } else {
-      applyStateToLocal(snap.data());
-    }
-    cloudLoadOk = true;
+    const data = await db.runTransaction(async transaction => {
+      const snap = await transaction.get(stateDocRef);
+      if (snap.exists) return snap.data();
+      transaction.set(stateDocRef, EMPTY_STATE);
+      return EMPTY_STATE;
+    });
+    applyStateToLocal(data);
+    dataLoadSucceeded = true;
     lastSyncIso = new Date().toISOString();
+    setFirebaseStatus('connected', 'connected');
+    return true;
   } catch (e) {
-    cloudLoadOk = false;
     console.error('Firebase load failed:', e);
-    const code = (e && e.code) ? e.code : 'unknown';
-    if (code === 'permission-denied') {
-      alert('Firebase is BLOCKING access (Firestore security rules). Your saved data is NOT deleted - it is just hidden.\n\nFix: Firebase Console > project "crystal-villa-booking" > Firestore > Rules, then allow access to appState/main.\n\nDo not add or edit bookings until this is fixed.');
-    } else {
-      alert('Could not load data from Firebase (' + code + '). Your saved data is NOT deleted. Check your internet connection and the firebaseConfig values, then refresh. Saving is paused so nothing gets overwritten.');
-    }
-    bookings = []; extraUsers = {}; auditLog = []; invoiceCounter = 0; accountsRate = 320; userPermissions = {};
+    dataLoadSucceeded = false;
+    setFirebaseStatus('connection failed; check internet and Firestore rules', 'error');
+    showLoginError('Could not load shared data from Firebase. Check your connection and Firestore permissions; sign-in is paused to protect existing data.');
+    return false;
   }
 }
 
 // Push current local state up to Firestore (debounced so rapid edits don't spam writes).
 function persistState() {
+  if (!firebaseReady || !dataLoadSucceeded) return;
   if (persistTimer) clearTimeout(persistTimer);
+  setFirebaseStatus('saving…', 'saving');
   persistTimer = setTimeout(async () => {
-    if (!cloudLoadOk) {
-      alert('Not saved: the app has not loaded your cloud data yet (Firebase access problem). Refresh the page after fixing Firebase - saving now would overwrite your real data.');
-      return;
-    }
     try {
       const payload = {
-        bookings, extraUsers, auditLog, invoiceCounter, accountsRate, userPermissions,
-        invoiceLogo: localStorage.getItem('cvInvoiceLogo') || null,
+        bookings, extraUsers, auditLog, invoiceCounter,
+        invoiceLogo,
       };
-      suppressNextSnapshot = true;
-      await stateDocRef.set(payload);
+      await stateDocRef.set(payload, { merge: true });
+      lastSyncIso = new Date().toISOString();
+      setFirebaseStatus('connected · all changes saved', 'connected');
     } catch (e) {
       console.error('Firebase save failed:', e);
-      alert('Could not save to Firebase. Your change is only on this device right now — check your internet connection.');
+      setFirebaseStatus('save failed; your latest changes are not in the cloud', 'error');
+      alert('Could not save to Firebase. Your latest change is not in the cloud. Check your internet connection and Firestore permissions, then try again.');
     }
   }, 400);
 }
 
 // Live updates from the OTHER device land here automatically.
 function setupRealtimeSync() {
-  stateDocRef.onSnapshot(snap => {
+  if (!firebaseReady) return;
+  stateDocRef.onSnapshot({ includeMetadataChanges: true }, snap => {
     if (!snap.exists) return;
-    if (suppressNextSnapshot) { suppressNextSnapshot = false; return; }
+    if (snap.metadata.hasPendingWrites) return;
     applyStateToLocal(snap.data());
+    dataLoadSucceeded = true;
     lastSyncIso = new Date().toISOString();
+    setFirebaseStatus('connected', 'connected');
     if (!currentUser) return;
     renderCalendar(); renderStats();
     if (document.getElementById('tab-bookings').style.display !== 'none') renderBookingList();
-    if (document.getElementById('tab-schedule').style.display !== 'none') renderSchedule();
     if (document.getElementById('tab-admin').style.display !== 'none') renderAdminPanel();
-    if (document.getElementById('tab-accounts').style.display !== 'none') renderAccountsPanel();
-  }, err => { console.error('Firebase realtime error:', err); cloudLoadOk = cloudLoadOk && err.code !== 'permission-denied'; });
+  }, err => {
+    console.error('Firebase realtime error:', err);
+    setFirebaseStatus('realtime connection lost; changes may not sync', 'error');
+  });
 }
 setupRealtimeSync();
 
 function syncNow() {
-  loadData().then(() => {
+  loadData().then(loaded => {
+    if (!loaded) return;
     renderCalendar(); renderStats();
     if (document.getElementById('tab-bookings').style.display !== 'none') renderBookingList();
-    if (document.getElementById('tab-schedule').style.display !== 'none') renderSchedule();
     if (document.getElementById('tab-admin').style.display !== 'none') renderAdminPanel();
-    if (document.getElementById('tab-accounts').style.display !== 'none') renderAccountsPanel();
   });
 }
 
@@ -1125,21 +807,6 @@ let bookings = [];
 let auditLog = [];
 let extraUsers = {}; // additional users created by admin
 let invoiceCounter = 0; // persisted
-let userPermissions = {}; // { username: { editAllBookings, deleteBookings, viewAccounts, managePayments } } — admin-granted permissions for non-admin users, persisted
-
-// Permissions an admin can grant to a non-admin (staff) user, shown in
-// Admin → User Access & Permissions. Admin accounts always have every
-// permission implicitly, regardless of what's stored here.
-const PERMISSION_DEFS = [
-  { key: 'editAllBookings', label: 'Edit Bookings', desc: 'Edit any booking, not just the ones this user added' },
-  { key: 'deleteBookings',  label: 'Delete Bookings', desc: 'Cancel / delete bookings' },
-  { key: 'managePayments',  label: 'Payment Requests', desc: 'Create & send proforma invoice / payment request links' },
-  { key: 'viewAccounts',    label: 'Accounts Tab', desc: 'View the Accounts (financial reports) tab' },
-];
-function hasPerm(key) {
-  if (isAdmin()) return true;
-  return !!(currentUser && currentUser.permissions && currentUser.permissions[key]);
-}
 
 // ═══════════════════════════════════════════════════════
 //  STORAGE
@@ -1149,15 +816,6 @@ function saveBookings() { persistState(); }
 function saveAuditLog() { persistState(); }
 function saveExtraUsers() { persistState(); }
 function saveInvoiceCounter() { persistState(); }
-function saveAccountsRate() {
-  if (!isAdmin()) return;
-  const v = parseFloat(document.getElementById('accounts-rate-input').value);
-  if (!v || v <= 0) { alert('Please enter a valid rate.'); return; }
-  accountsRate = v;
-  addAudit('set_accounts_rate', `Updated Accounts reference rate to 1 USD = ${v} LKR`, '💱');
-  persistState();
-  renderAccountsPanel();
-}
 function saveSession(u) { localStorage.setItem('cvSession', u); }
 function loadSession() { return localStorage.getItem('cvSession'); }
 function clearSession() { localStorage.removeItem('cvSession'); }
@@ -1213,14 +871,21 @@ function togglePasswordVisibility() {
   else { inp.type = 'password'; btn.textContent = '👁️'; }
 }
 
-function loginWithPassword() {
+async function loginWithPassword() {
   const username = document.getElementById('inp-username').value.trim().toLowerCase();
   const password = document.getElementById('inp-password').value;
-  const acc = getAccount(username);
-  if (!acc) { showLoginError('Username not found.'); return; }
-  if (acc.password !== password) { showLoginError('Incorrect password.'); return; }
-  saveCredentials(username, password);
-  doLogin(username, acc);
+  const signInBtn = document.querySelector('.login-card .btn-primary');
+  if (signInBtn) { signInBtn.disabled = true; signInBtn.textContent = 'Loading your data…'; }
+  try {
+    if (!await loadData()) return;
+    const acc = getAccount(username);
+    if (!acc) { showLoginError('Username not found.'); return; }
+    if (acc.password !== password) { showLoginError('Incorrect password.'); return; }
+    saveCredentials(username, password);
+    doLogin(username, acc);
+  } finally {
+    if (signInBtn) { signInBtn.disabled = false; signInBtn.textContent = 'Sign in'; }
+  }
 }
 
 function showLoginError(msg) {
@@ -1229,14 +894,9 @@ function showLoginError(msg) {
   setTimeout(() => el.classList.remove('show'), 4000);
 }
 
-async function doLogin(username, acc) {
-  currentUser = { username, ...acc, permissions: userPermissions[username] || {} };
+function doLogin(username, acc) {
+  currentUser = { username, ...acc };
   saveSession(username);
-  const signInBtn = document.querySelector('.login-card .btn-primary');
-  if (signInBtn) { signInBtn.disabled = true; signInBtn.textContent = 'Loading your data…'; }
-  await loadData();
-  currentUser.permissions = userPermissions[username] || {}; // re-apply after loadData() refreshes userPermissions from the cloud
-  if (signInBtn) { signInBtn.disabled = false; signInBtn.textContent = 'Sign in'; }
   document.getElementById('screen-login').classList.remove('active');
   document.getElementById('screen-app').classList.add('active');
   document.getElementById('user-name-display').textContent = acc.name;
@@ -1247,19 +907,14 @@ async function doLogin(username, acc) {
   rb.textContent = acc.role === 'admin' ? 'ADMIN' : 'STAFF';
   rb.style.background = acc.role === 'admin' ? '#fdf5e6' : '#e8f0f8';
   rb.style.color = acc.role === 'admin' ? '#c9963a' : '#1a4f8b';
-  // Admin tab (user management & permissions) is strictly admin-only.
+  // Show admin tab only for admin
   document.querySelectorAll('.admin-only-tab').forEach(t => {
     t.style.display = isAdmin() ? '' : 'none';
-  });
-  // Accounts tab is admin-only by default, but can be granted to staff via permissions.
-  document.querySelectorAll('.accounts-tab').forEach(t => {
-    t.style.display = (isAdmin() || hasPerm('viewAccounts')) ? '' : 'none';
   });
   populateSelects();
   renderStats();
   renderCalendar();
   addAudit('login', `Signed in`, '🔑');
-  checkTodayArrivals();
 }
 
 function logout() {
@@ -1282,13 +937,9 @@ function switchTab(tab, btn) {
   if (btn) btn.classList.add('active');
   document.getElementById('tab-calendar').style.display = tab === 'calendar' ? '' : 'none';
   document.getElementById('tab-bookings').style.display = tab === 'bookings' ? '' : 'none';
-  document.getElementById('tab-schedule').style.display = tab === 'schedule' ? '' : 'none';
   document.getElementById('tab-admin').style.display = tab === 'admin' ? '' : 'none';
-  document.getElementById('tab-accounts').style.display = tab === 'accounts' ? '' : 'none';
   if (tab === 'bookings') renderBookingList();
-  if (tab === 'schedule') renderSchedule();
   if (tab === 'admin') renderAdminPanel();
-  if (tab === 'accounts') renderAccountsPanel();
 }
 
 // ═══════════════════════════════════════════════════════
@@ -1299,16 +950,13 @@ function renderStats() {
   const active = bookings.filter(b => b.checkIn <= today && b.checkOut > today).length;
   const upcoming = bookings.filter(b => b.checkIn > today).length;
   const m = `${calYear}-${pad(calMonth+1)}`;
-  const monthBookings = bookings.filter(b => b.checkIn.startsWith(m));
-  const revLKR = monthBookings.filter(b => b.guestType === 'local').reduce((s,b) => s + (parseFloat(b.price)||0) * daysBetween(b.checkIn, b.checkOut), 0);
-  const revUSD = monthBookings.filter(b => b.guestType !== 'local').reduce((s,b) => s + (parseFloat(b.price)||0) * daysBetween(b.checkIn, b.checkOut), 0);
-  const totalNights = monthBookings.reduce((s,b) => s + daysBetween(b.checkIn, b.checkOut), 0);
+  const rev = bookings.filter(b => b.checkIn.startsWith(m)).reduce((s,b) => s + (parseFloat(b.price)||0) * daysBetween(b.checkIn, b.checkOut), 0);
+  const totalNights = bookings.filter(b => b.checkIn.startsWith(m)).reduce((s,b) => s + daysBetween(b.checkIn, b.checkOut), 0);
   document.getElementById('stats-grid').innerHTML = `
     <div class="stat-card"><div class="s-label">Rooms</div><div class="s-val">5</div><div class="s-sub">2 bungalow · 1 double · 2 triple</div></div>
     <div class="stat-card"><div class="s-label">Currently active</div><div class="s-val">${active}</div><div class="s-sub">guests checked in</div></div>
     <div class="stat-card"><div class="s-label">Upcoming</div><div class="s-val">${upcoming}</div><div class="s-sub">future bookings</div></div>
-    <div class="stat-card"><div class="s-label">${MONTHS[calMonth]} revenue (Local)</div><div class="s-val">Rs ${Math.round(revLKR).toLocaleString()}</div><div class="s-sub">${totalNights} nights booked</div></div>
-    <div class="stat-card"><div class="s-label">${MONTHS[calMonth]} revenue (Foreign)</div><div class="s-val">$${Math.round(revUSD).toLocaleString()}</div><div class="s-sub">${totalNights} nights booked</div></div>
+    <div class="stat-card"><div class="s-label">${MONTHS[calMonth]} revenue</div><div class="s-val">$${Math.round(rev).toLocaleString()}</div><div class="s-sub">${totalNights} nights booked</div></div>
   `;
 }
 
@@ -1355,11 +1003,9 @@ function renderCalendar() {
 function renderBookingList() {
   const filterRoom = document.getElementById('filter-room').value;
   const filterStatus = document.getElementById('filter-status').value;
-  const filterSource = document.getElementById('filter-source').value;
   let list = [...bookings].sort((a,b) => a.checkIn.localeCompare(b.checkIn));
   if (filterRoom) list = list.filter(b => b.room === filterRoom);
   if (filterStatus) list = list.filter(b => getStatus(b) === filterStatus);
-  if (filterSource) list = list.filter(b => (b.source || 'Direct') === filterSource);
   const grid = document.getElementById('booking-list-grid');
   if (list.length === 0) {
     grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="big">🛏️</div><p>No bookings found</p></div>`;
@@ -1370,8 +1016,7 @@ function renderBookingList() {
     const status = getStatus(b);
     const nights = daysBetween(b.checkIn, b.checkOut);
     const total = (parseFloat(b.price)||0) * nights;
-    const canEdit = isAdmin() || hasPerm('editAllBookings') || b.addedBy === currentUser.name;
-    const canDelete = isAdmin() || hasPerm('deleteBookings');
+    const canEdit = isAdmin();
     return `
     <div class="bk-card">
       <div class="bk-card-top">
@@ -1383,20 +1028,19 @@ function renderBookingList() {
         <span>🌙 ${nights} night${nights!==1?'s':''}</span>
         ${b.mealPlan ? `<span>🍽️ ${MEAL_LABELS[b.mealPlan]||b.mealPlan}</span>` : ''}
         ${b.source ? `<span>📌 ${b.source}</span>` : ''}
-        <span><span class="status-dot ${status}">● ${status.charAt(0).toUpperCase()+status.slice(1)}</span> ${pfCardBadge(b)}</span>
+        <span><span class="status-dot ${status}">● ${status.charAt(0).toUpperCase()+status.slice(1)}</span></span>
         <span style="font-size:11px;color:var(--text3);">Added by: ${b.addedBy||'—'}</span>
       </div>
       <div class="bk-footer">
         <div>
-          <div class="price-tag">${b.guestType==='local'?'Rs ':'$'}${total.toLocaleString(undefined,{maximumFractionDigits:2})}</div>
-          <div style="font-size:11px;color:var(--text3);">${b.guestType==='local'?'Rs ':'$'}${(parseFloat(b.price)||0).toFixed(2)}/night × ${nights}</div>
+          <div class="price-tag">$${total.toLocaleString(undefined,{maximumFractionDigits:2})}</div>
+          <div style="font-size:11px;color:var(--text3);">$${(parseFloat(b.price)||0).toFixed(2)}/night × ${nights}</div>
         </div>
         <div class="card-actions">
-          ${(isAdmin() || hasPerm('managePayments')) ? `<button class="icon-action" title="Payment Request" onclick="openPaymentRequestById('${b.id}')">💳</button>` : ''}
           <button class="icon-action" title="Print Invoice" onclick="openInvoiceById('${b.id}')">🖨️</button>
           <button class="icon-action del" title="Cancel" onclick="openCancelModal('${b.id}')">⛔</button>
-          ${canEdit ? `<button class="icon-action" title="Edit" onclick="openEditModal('${b.id}')">✏️</button>` : ''}
-          ${canDelete ? `<button class="icon-action del" title="Delete" onclick="deleteBooking('${b.id}')">🗑️</button>` : ''}
+          ${canEdit ? `<button class="icon-action" title="Edit" onclick="openEditModal('${b.id}')">✏️</button>
+          <button class="icon-action del" title="Delete" onclick="deleteBooking('${b.id}')">🗑️</button>` : ''}
         </div>
       </div>
     </div>`;
@@ -1413,7 +1057,7 @@ function renderAdminPanel() {
   }
   const allAccounts = getAllAccounts();
 
-  const logoData = localStorage.getItem('cvInvoiceLogo') || '';
+  const logoData = invoiceLogo || '';
   const logoPreview = logoData
     ? `<img src="${logoData}" style="max-width:120px;max-height:60px;border:1px solid var(--border);border-radius:8px;object-fit:contain;background:white;"/>`
     : `<div style="font-size:12px;color:var(--text3);">No logo set</div>`;
@@ -1432,7 +1076,7 @@ function renderAdminPanel() {
             <button class="btn-sm primary" onclick="saveInvoiceLogoFromFile()">Save Logo</button>
             <button class="btn-sm" onclick="clearInvoiceLogo()">Remove Logo</button>
           </div>
-          <div style="font-size:12px;color:var(--text3);margin-top:10px;">Saved into browser localStorage for this device.</div>
+          <div style="font-size:12px;color:var(--text3);margin-top:10px;">Saved to the shared Firebase database.</div>
         </div>
       </div>
     </div>`;
@@ -1468,56 +1112,6 @@ function renderAdminPanel() {
       </div>
     </div>`).join('') || '<div style="color:var(--text3);padding:20px;text-align:center;">No activity logged yet</div>';
 
-  const accountsRateSection = `
-    <div class="admin-section">
-      <h4>💼 Accounts Settings</h4>
-      <div class="form-group" style="max-width:320px;">
-        <label style="color:var(--text2);font-size:12px;text-transform:none;letter-spacing:normal;font-weight:700;display:block;margin-bottom:6px;">Reference USD → LKR Rate (used for Accounts reporting)</label>
-        <input type="number" id="accounts-rate-input" min="0.01" step="0.01" value="${accountsRate}" style="width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:8px;background:var(--bg);font-size:15px;" />
-      </div>
-      <div class="modal-actions" style="justify-content:flex-start;">
-        <button class="btn-sm primary" onclick="saveAccountsRate()">Save Rate</button>
-      </div>
-      <div style="font-size:12px;color:var(--text3);margin-top:10px;">Used to show dual LKR/USD totals in the Accounts tab, regardless of each booking's own guest currency.</div>
-    </div>`;
-
-  // ── USER ACCESS & PERMISSIONS (admin only) ──
-  // Lets an admin enable/disable specific capabilities — booking edit,
-  // booking delete, payment requests, accounts access — per staff user,
-  // without making them a full admin.
-  const staffAccounts = Object.entries(allAccounts).filter(([, acc]) => acc.role !== 'admin');
-  const permHeaderCells = PERMISSION_DEFS.map(p => `<th title="${p.desc}">${p.label}</th>`).join('');
-  const permRows = staffAccounts.length === 0
-    ? `<tr><td colspan="${PERMISSION_DEFS.length + 1}" style="text-align:center;color:var(--text3);padding:16px;">No staff users yet — add one above to grant permissions.</td></tr>`
-    : staffAccounts.map(([uname, acc]) => {
-        const perms = userPermissions[uname] || {};
-        const cells = PERMISSION_DEFS.map(p => `
-          <td>
-            <label class="perm-switch">
-              <input type="checkbox" ${perms[p.key] ? 'checked' : ''} onchange="togglePermission('${uname}','${p.key}', this.checked)" />
-              <span class="slider"></span>
-            </label>
-          </td>`).join('');
-        return `<tr>
-          <td><div style="display:flex;align-items:center;gap:8px;">
-            <div style="width:26px;height:26px;border-radius:50%;background:${acc.color||'#1a4f8b'};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:white;">${acc.initials||uname.substring(0,2).toUpperCase()}</div>
-            <div><div style="font-weight:600;">${acc.name}</div><div style="font-size:11px;color:var(--text3);">@${uname}</div></div>
-          </div></td>
-          ${cells}
-        </tr>`;
-      }).join('');
-  const permissionsSection = `
-    <div class="admin-section">
-      <h4>🔐 User Access &amp; Permissions</h4>
-      <p class="perm-admin-note" style="margin-bottom:12px;">Grant staff users extra access without making them full admins. Admin accounts always have full access to everything. Changes take effect immediately for that user (on their next action / next login).</p>
-      <div class="user-table-wrap">
-        <table class="perm-table">
-          <thead><tr><th>User</th>${permHeaderCells}</tr></thead>
-          <tbody>${permRows}</tbody>
-        </table>
-      </div>
-    </div>`;
-
   document.getElementById('admin-content').innerHTML = `
     <!-- USER MANAGEMENT -->
     <div class="admin-section">
@@ -1531,11 +1125,7 @@ function renderAdminPanel() {
       </div>
     </div>
 
-    ${permissionsSection}
-
     ${logoSection}
-
-    ${accountsRateSection}
 
     <!-- AUDIT LOG -->
     <div class="admin-section">
@@ -1635,27 +1225,8 @@ function removeUser(username) {
   if (!confirm(`Remove user @${username}? This cannot be undone.`)) return;
   addAudit('remove_user', `Removed user @${username}`, '🗑️');
   delete extraUsers[username];
-  delete userPermissions[username];
   saveExtraUsers();
-  savePermissionsState();
   renderAdminPanel();
-}
-
-// ═══════════════════════════════════════════════════════
-//  USER ACCESS & PERMISSIONS (admin only)
-// ═══════════════════════════════════════════════════════
-function savePermissionsState() { persistState(); }
-
-function togglePermission(username, key, checked) {
-  if (!isAdmin()) return;
-  if (!userPermissions[username]) userPermissions[username] = {};
-  userPermissions[username][key] = checked;
-  savePermissionsState();
-  const def = PERMISSION_DEFS.find(p => p.key === key);
-  addAudit('edit_permissions', `${checked ? 'Granted' : 'Revoked'} "${def ? def.label : key}" for @${username}`, '🔐');
-  // If the permission change affects the currently logged-in user in another
-  // tab/device, this device's own currentUser object isn't touched here —
-  // it's refreshed the next time that user's session reloads/logs in.
 }
 
 // ═══════════════════════════════════════════════════════
@@ -1669,11 +1240,19 @@ function saveInvoiceLogoFromFile() {
     return;
   }
   const file = inp.files[0];
+  if (file.size > 512 * 1024) {
+    alert('Please choose an image smaller than 512 KB so it fits safely in the shared Firebase record.');
+    return;
+  }
   const reader = new FileReader();
   reader.onload = () => {
-    localStorage.setItem('cvInvoiceLogo', String(reader.result || ''));
+    invoiceLogo = String(reader.result || '');
     addAudit('set_invoice_logo', `Updated invoice logo`, '🖼️');
     renderAdminPanel();
+  };
+  reader.onerror = () => {
+    console.error('Invoice logo read failed:', reader.error);
+    alert('Could not read the selected logo file.');
   };
   reader.readAsDataURL(file);
 }
@@ -1681,204 +1260,9 @@ function saveInvoiceLogoFromFile() {
 function clearInvoiceLogo() {
   if (!isAdmin()) return;
   if (!confirm('Remove invoice logo?')) return;
-  localStorage.removeItem('cvInvoiceLogo');
+  invoiceLogo = null;
   addAudit('clear_invoice_logo', `Removed invoice logo`, '🧹');
   renderAdminPanel();
-}
-
-// ═══════════════════════════════════════════════════════
-//  ACCOUNTS PANEL (Admin only)
-// ═══════════════════════════════════════════════════════
-function renderAccountsPanel() {
-  if (!isAdmin() && !hasPerm('viewAccounts')) {
-    document.getElementById('accounts-content').innerHTML = `<div class="access-denied">🚫 Access Denied — Admin only</div>`;
-    return;
-  }
-  const m = `${calYear}-${pad(calMonth+1)}`;
-  const monthBookings = bookings.filter(b => b.checkIn.startsWith(m)).sort((a,b) => a.checkIn.localeCompare(b.checkIn));
-
-  let totalGrossLKR = 0, totalGrossUSD = 0;
-  let totalCardFeeLKR = 0, totalCardFeeUSD = 0;
-  let totalNetLKR = 0, totalNetUSD = 0;
-
-  const rows = monthBookings.map(b => {
-    const room = ROOMS.find(r => r.id === b.room) || { name: b.room };
-    const nights = daysBetween(b.checkIn, b.checkOut);
-    const gross = (parseFloat(b.price)||0) * nights;
-    const isLocal = b.guestType === 'local';
-    const cardFee = b.paymentMethod === 'Card' ? gross * 0.025 : 0;
-    const net = gross - cardFee;
-    const vatServiceAmt = gross - (gross / 1.18);
-
-    if (isLocal) { totalGrossLKR += gross; totalCardFeeLKR += cardFee; totalNetLKR += net; }
-    else { totalGrossUSD += gross; totalCardFeeUSD += cardFee; totalNetUSD += net; }
-
-    const grossLKR = isLocal ? gross : gross * accountsRate;
-    const grossUSD = isLocal ? gross / accountsRate : gross;
-    const vatServiceLKR = isLocal ? vatServiceAmt : vatServiceAmt * accountsRate;
-    const vatServiceUSD = isLocal ? vatServiceAmt / accountsRate : vatServiceAmt;
-    const cardFeeLKR = isLocal ? cardFee : cardFee * accountsRate;
-    const cardFeeUSD = isLocal ? cardFee / accountsRate : cardFee;
-    const netLKR = isLocal ? net : net * accountsRate;
-    const netUSD = isLocal ? net / accountsRate : net;
-    const dual = (lkr, usd) => `Rs ${lkr.toLocaleString(undefined,{maximumFractionDigits:2})}<br><span style="color:var(--text3);font-size:11px;">$${usd.toLocaleString(undefined,{maximumFractionDigits:2})}</span>`;
-
-    return `<tr>
-      <td>${b.guestName}</td>
-      <td>${room.name}</td>
-      <td><span class="role-badge ${isLocal?'staff':'admin'}">${isLocal?'Local':'Foreign'}</span></td>
-      <td>${payIcon(b.paymentMethod)} ${b.paymentMethod||'—'}</td>
-      <td style="text-align:right;">${dual(grossLKR, grossUSD)}</td>
-      <td style="text-align:right;color:var(--text3);font-size:12px;">${dual(vatServiceLKR, vatServiceUSD)}</td>
-      <td style="text-align:right;color:var(--text3);font-size:12px;">${cardFee>0 ? dual(cardFeeLKR, cardFeeUSD) : '—'}</td>
-      <td style="text-align:right;font-weight:600;">${dual(netLKR, netUSD)}</td>
-      <td><button class="icon-action" title="Print Accounts Invoice" onclick="openAccountsInvoiceById('${b.id}')">🖨️</button></td>
-    </tr>`;
-  }).join('') || `<tr><td colspan="9" style="text-align:center;color:var(--text3);padding:20px;">No bookings for ${MONTHS[calMonth]} ${calYear}</td></tr>`;
-
-  document.getElementById('accounts-content').innerHTML = `
-    <div class="stats-grid" style="margin-bottom:20px;">
-      <div class="stat-card"><div class="s-label">${MONTHS[calMonth]} Gross Revenue (Local)</div><div class="s-val">Rs ${Math.round(totalGrossLKR).toLocaleString()}</div></div>
-      <div class="stat-card"><div class="s-label">${MONTHS[calMonth]} Gross Revenue (Foreign)</div><div class="s-val">$${Math.round(totalGrossUSD).toLocaleString()}</div></div>
-      <div class="stat-card"><div class="s-label">Card Fees Deducted (2.5%)</div><div class="s-val">Rs ${Math.round(totalCardFeeLKR).toLocaleString()}</div><div class="s-sub">$${totalCardFeeUSD.toFixed(2)} (foreign card fees)</div></div>
-      <div class="stat-card"><div class="s-label">Net to Bank</div><div class="s-val">Rs ${Math.round(totalNetLKR).toLocaleString()}</div><div class="s-sub">$${Math.round(totalNetUSD).toLocaleString()} (foreign)</div></div>
-    </div>
-    <div class="admin-section">
-      <h4>🏦 Bank Deposit Summary — Reference rate 1 USD = ${accountsRate} LKR</h4>
-      <div style="font-size:13px;color:var(--text2);line-height:1.9;">
-        Combined Net to Bank, all in LKR: <strong>Rs ${Math.round(totalNetLKR + totalNetUSD*accountsRate).toLocaleString()}</strong><br>
-        Combined Net to Bank, all in USD: <strong>$${Math.round(totalNetUSD + totalNetLKR/accountsRate).toLocaleString()}</strong><br>
-        <span style="font-size:12px;color:var(--text3);">(Local guest bookings are collected in LKR; foreign guest bookings are collected in USD. This just shows both totals side by side using the reference rate above — set it in Admin → Accounts Settings.)</span>
-      </div>
-    </div>
-    <div class="admin-section">
-      <h4>📊 ${MONTHS[calMonth]} ${calYear} — Booking Breakdown</h4>
-      <div style="font-size:12px;color:var(--text3);margin-bottom:8px;">Amounts shown as LKR (with USD equivalent below) — reference rate 1 USD = ${accountsRate} LKR.</div>
-      <div style="overflow-x:auto;">
-        <table class="user-table">
-          <thead><tr>
-            <th>Guest</th><th>Room</th><th>Type</th><th>Payment</th>
-            <th style="text-align:right;">Gross (LKR / USD)</th>
-            <th style="text-align:right;">VAT/Service (18%)</th>
-            <th style="text-align:right;">Card Fee (2.5%)</th>
-            <th style="text-align:right;">Net to Bank</th>
-            <th>Print</th>
-          </tr></thead>
-          <tbody>${rows}</tbody>
-        </table>
-      </div>
-      <div style="margin-top:14px;">
-        <button class="export-btn" onclick="exportAccountsCSV()">📊 Export Accounts CSV</button>
-      </div>
-    </div>
-  `;
-}
-
-function exportAccountsCSV() {
-  if (!isAdmin()) return;
-  const m = `${calYear}-${pad(calMonth+1)}`;
-  const monthBookings = bookings.filter(b => b.checkIn.startsWith(m)).sort((a,b) => a.checkIn.localeCompare(b.checkIn));
-  const rows = [['Guest Name','Guest Type','Room','Payment Method','Currency','Gross Amount','VAT & Service (18% Incl.)','Card Fee (2.5%)','Net to Bank','Check-in','Check-out']];
-  monthBookings.forEach(b => {
-    const room = ROOMS.find(r => r.id === b.room) || { name: b.room };
-    const nights = daysBetween(b.checkIn, b.checkOut);
-    const gross = (parseFloat(b.price)||0) * nights;
-    const isLocal = b.guestType === 'local';
-    const cardFee = b.paymentMethod === 'Card' ? gross * 0.025 : 0;
-    const net = gross - cardFee;
-    const vatServiceAmt = gross - (gross / 1.18);
-    rows.push([b.guestName, isLocal?'Local':'Foreign', room.name, b.paymentMethod||'', isLocal?'LKR':'USD', gross.toFixed(2), vatServiceAmt.toFixed(2), cardFee.toFixed(2), net.toFixed(2), b.checkIn, b.checkOut]);
-  });
-  const csv = rows.map(r => r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
-  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a'); a.href = url;
-  a.download = `crystal-villa-accounts-${MONTHS[calMonth]}-${calYear}.csv`; a.click();
-  URL.revokeObjectURL(url);
-  addAudit('export', `Exported Accounts CSV for ${MONTHS[calMonth]} ${calYear}`, '📊');
-}
-
-function openAccountsInvoiceById(id) {
-  if (!isAdmin() && !hasPerm('viewAccounts')) { alert('Only admin can view Accounts documents.'); return; }
-  const b = bookings.find(x => x.id === id);
-  if (!b) return;
-  addAudit('print_accounts_invoice', `Printed Accounts invoice for ${b.guestName}`, '🖨️');
-  const room = ROOMS.find(r => r.id === b.room) || { name: b.room, type: '' };
-  const nights = daysBetween(b.checkIn, b.checkOut);
-  const gross = (parseFloat(b.price)||0) * nights;
-  const isLocal = b.guestType === 'local';
-  const sym = isLocal ? 'Rs ' : '$';
-  const cardFee = b.paymentMethod === 'Card' ? gross * 0.025 : 0;
-  const net = gross - cardFee;
-  const vatServiceAmt = gross - (gross / 1.18);
-  const vatBase = gross / 1.18;
-  const grossLKR = isLocal ? gross : gross * accountsRate;
-  const grossUSD = isLocal ? gross / accountsRate : gross;
-  const netLKR = isLocal ? net : net * accountsRate;
-  const netUSD = isLocal ? net / accountsRate : net;
-  const vatBaseLKR = isLocal ? vatBase : vatBase * accountsRate;
-  const vatBaseUSD = isLocal ? vatBase / accountsRate : vatBase;
-  const vatServiceLKR = isLocal ? vatServiceAmt : vatServiceAmt * accountsRate;
-  const vatServiceUSD = isLocal ? vatServiceAmt / accountsRate : vatServiceAmt;
-  const cardFeeLKR = isLocal ? cardFee : cardFee * accountsRate;
-  const cardFeeUSD = isLocal ? cardFee / accountsRate : cardFee;
-  const invNum = b.invNum ? 'CV-' + String(b.invNum).padStart(3,'0') : 'CV-???';
-  const today = new Date().toLocaleDateString('en-GB', { day:'2-digit', month:'long', year:'numeric' });
-
-  const html = `
-<div class="invoice-wrap">
-  <div class="inv-header">
-    <div class="inv-logo-block">
-      <div class="inv-hotel-info">
-        <h2>Crystal Villa — Accounts Department</h2>
-        <p>Internal document — not for guest distribution</p>
-        <p>Galle Matara Road, Palena, Weligama, 81700, Sri Lanka</p>
-      </div>
-    </div>
-    <div class="inv-title-block">
-      <h3>Payment &amp; Bank Deposit Breakdown</h3>
-      <p><strong>Invoice No:</strong> ${invNum}</p>
-      <p><strong>Report Date:</strong> ${today}</p>
-      <p><strong>Prepared by:</strong> ${currentUser ? currentUser.name : '—'}</p>
-    </div>
-  </div>
-
-  <div class="inv-section">
-    <div class="inv-section-title">Booking Information</div>
-    <div class="inv-grid">
-      <div class="inv-field"><label>Guest Name</label><span>${b.guestName}</span></div>
-      <div class="inv-field"><label>Guest Type</label><span>${isLocal ? 'Local (LKR)' : 'Foreign (USD)'}</span></div>
-      <div class="inv-field"><label>Room</label><span>${room.name} (${room.type})</span></div>
-      <div class="inv-field"><label>Check-in / Check-out</label><span>${fmtDate(b.checkIn)} → ${fmtDate(b.checkOut)} (${nights} nights)</span></div>
-      <div class="inv-field"><label>Payment Method</label><span>${payIcon(b.paymentMethod)} ${b.paymentMethod || '—'}</span></div>
-      <div class="inv-field"><label>Added By</label><span>${b.addedBy || '—'}</span></div>
-    </div>
-  </div>
-
-  <div class="inv-section">
-    <div class="inv-section-title">Payment Breakdown — Reference rate: 1 USD = ${accountsRate} LKR</div>
-    <table class="inv-charges-table">
-      <thead><tr><th>Description</th><th style="text-align:right;">LKR</th><th style="text-align:right;">USD</th></tr></thead>
-      <tbody>
-        <tr><td>Gross Guest Payment (Total charged)</td><td style="text-align:right;">Rs ${grossLKR.toLocaleString(undefined,{maximumFractionDigits:2})}</td><td style="text-align:right;">$${grossUSD.toLocaleString(undefined,{maximumFractionDigits:2})}</td></tr>
-        <tr><td style="color:#666;font-size:11px;">— Room Charge (Excl. VAT &amp; Service)</td><td style="text-align:right;color:#666;font-size:11px;">Rs ${vatBaseLKR.toLocaleString(undefined,{maximumFractionDigits:2})}</td><td style="text-align:right;color:#666;font-size:11px;">$${vatBaseUSD.toLocaleString(undefined,{maximumFractionDigits:2})}</td></tr>
-        <tr><td style="color:#666;font-size:11px;">— VAT &amp; Service Charge (18%, Included)</td><td style="text-align:right;color:#666;font-size:11px;">Rs ${vatServiceLKR.toLocaleString(undefined,{maximumFractionDigits:2})}</td><td style="text-align:right;color:#666;font-size:11px;">$${vatServiceUSD.toLocaleString(undefined,{maximumFractionDigits:2})}</td></tr>
-        ${cardFee > 0 ? `<tr><td>Less: Card Processing Fee (2.5%, deducted by bank)</td><td style="text-align:right;color:var(--danger);">– Rs ${cardFeeLKR.toLocaleString(undefined,{maximumFractionDigits:2})}</td><td style="text-align:right;color:var(--danger);">– $${cardFeeUSD.toLocaleString(undefined,{maximumFractionDigits:2})}</td></tr>` : `<tr><td style="color:#666;font-size:11px;">Card Processing Fee</td><td colspan="2" style="text-align:right;color:#666;font-size:11px;">Not applicable (paid by ${b.paymentMethod||'—'})</td></tr>`}
-      </tbody>
-      <tfoot>
-        <tr class="inv-total-row"><td>NET AMOUNT DEPOSITED TO BANK</td><td style="text-align:right;">Rs ${netLKR.toLocaleString(undefined,{maximumFractionDigits:2})}</td><td style="text-align:right;">$${netUSD.toLocaleString(undefined,{maximumFractionDigits:2})}</td></tr>
-      </tfoot>
-    </table>
-    <div style="font-size:11px;color:var(--text3);margin-top:6px;">Native amount actually collected from guest: ${sym}${gross.toLocaleString(undefined,{maximumFractionDigits:2})} (${isLocal?'LKR':'USD'}). LKR/USD columns above are shown side by side using the reference rate for accounts reporting.</div>
-  </div>
-
-  <div class="inv-footer">
-    Crystal Villa · Accounts Department · Internal use only — not to be issued to guests.
-  </div>
-</div>`;
-
-  document.getElementById('print-area').innerHTML = html;
-  document.getElementById('invoice-modal').classList.add('open');
 }
 
 // ═══════════════════════════════════════════════════════
@@ -1889,10 +1273,6 @@ function openModal(prefillDate, prefillRoom) {
   document.getElementById('modal-title').textContent = 'New Booking';
   ['f-guest','f-nationality','f-passport','f-phone','f-email','f-notes','f-price','f-price-usd'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('f-room').value = prefillRoom || '';
-  document.getElementById('room-select-single-wrap').style.display = 'none';
-  document.getElementById('room-select-multi-wrap').style.display = 'block';
-  resetRoomChips();
-  if (prefillRoom) toggleRoomChip(prefillRoom);
   document.getElementById('f-adults').value = '1';
   document.getElementById('f-children').value = '0';
   document.getElementById('children-ages-wrap').style.display = 'none';
@@ -1901,10 +1281,8 @@ function openModal(prefillDate, prefillRoom) {
   document.getElementById('f-checkout').value = '';
   document.getElementById('f-meal').value = 'RO';
   document.getElementById('f-source').value = 'Direct';
-  document.getElementById('f-guest-type').value = 'foreign';
   document.getElementById('f-currency').value = 'LKR';
   document.getElementById('f-rate').value = '320';
-  onGuestTypeChange();
   document.getElementById('f-payment').value = '';
   document.getElementById('nights-display').style.display = 'none';
   document.getElementById('converted-display').style.display = 'none';
@@ -1918,18 +1296,15 @@ function openModal(prefillDate, prefillRoom) {
 function quickAdd(date, roomId) { openModal(date, roomId); }
 
 function openEditModal(id) {
-  // Staff can edit if: they added it, OR they've been granted the "Edit Bookings" permission by an admin. Admins can always edit.
+  // Staff can only edit if they added it — admin can edit all
   const b = bookings.find(x => x.id === id);
   if (!b) return;
-  if (!isAdmin() && !hasPerm('editAllBookings') && b.addedBy !== currentUser.name) {
+  if (!isAdmin() && b.addedBy !== currentUser.name) {
     alert('You can only edit bookings you added. Contact an admin to edit this booking.');
     return;
   }
   editingId = id;
   document.getElementById('modal-title').textContent = 'Edit Booking';
-  document.getElementById('room-select-single-wrap').style.display = 'block';
-  document.getElementById('room-select-multi-wrap').style.display = 'none';
-  resetRoomChips();
   document.getElementById('f-guest').value = b.guestName;
   document.getElementById('f-nationality').value = b.nationality || '';
   document.getElementById('f-passport').value = b.passport || '';
@@ -1946,8 +1321,6 @@ function openEditModal(id) {
   document.getElementById('f-price-usd').value = b.price;
   document.getElementById('f-currency').value = b.currency || 'LKR';
   document.getElementById('f-rate').value = b.exchangeRate || '320';
-  document.getElementById('f-guest-type').value = b.guestType || ((b.currency === 'LKR' && parseFloat(b.exchangeRate) === 1) ? 'local' : 'foreign');
-  onGuestTypeChange();
   document.getElementById('f-payment').value = b.paymentMethod || '';
   document.getElementById('f-notes').value = b.notes || '';
   document.querySelectorAll('.pay-btn').forEach(btn => btn.classList.remove('selected'));
@@ -1978,90 +1351,71 @@ function updateNights() {
     const n = daysBetween(ci, co);
     const rate = parseFloat(document.getElementById('f-price-usd').value) || parseFloat(document.getElementById('f-price').value) || 0;
     const total = rate * n;
-    const sym = document.getElementById('f-guest-type').value === 'local' ? 'Rs ' : '$';
-    el.innerHTML = `🌙 <strong>${n} night${n!==1?'s':''}</strong>${rate > 0 ? ` &nbsp;·&nbsp; ${sym}${rate.toFixed(2)}/night × ${n} = <strong>${sym}${total.toFixed(2)}</strong>` : ''}`;
+    el.innerHTML = `🌙 <strong>${n} night${n!==1?'s':''}</strong>${rate > 0 ? ` &nbsp;·&nbsp; $${rate.toFixed(2)}/night × ${n} = <strong>$${total.toFixed(2)}</strong>` : ''}`;
     el.style.display = 'block';
   } else { el.style.display = 'none'; }
 }
 
 function saveBooking() {
   const guestName = document.getElementById('f-guest').value.trim();
+  const room = document.getElementById('f-room').value;
   const checkIn = document.getElementById('f-checkin').value;
   const checkOut = document.getElementById('f-checkout').value;
   const price = document.getElementById('f-price').value;
-  const isEditing = !!editingId;
-  const rooms = isEditing ? [document.getElementById('f-room').value] : [...selectedRoomIds];
 
   if (!guestName) { showFormError('Guest name is required.'); return; }
-  if (!rooms.length || !rooms[0]) { showFormError(isEditing ? 'Please select a room.' : 'Please select at least one room.'); return; }
+  if (!room) { showFormError('Please select a room.'); return; }
   if (!checkIn) { showFormError('Check-in date is required.'); return; }
   if (!checkOut) { showFormError('Check-out date is required.'); return; }
   if (checkOut <= checkIn) { showFormError('Check-out must be after check-in.'); return; }
 
-  // Check overlap for every selected room before saving anything.
-  for (const room of rooms) {
-    const overlap = bookings.find(b => b.room === room && b.id !== editingId && b.checkIn < checkOut && b.checkOut > checkIn);
-    if (overlap) {
-      const roomName = ROOMS.find(r => r.id === room)?.name || room;
-      showFormError(`${roomName} already booked by ${overlap.guestName} (${fmtDate(overlap.checkIn)} – ${fmtDate(overlap.checkOut)}).`);
-      return;
-    }
-  }
+  const overlap = bookings.find(b => b.room === room && b.id !== editingId && b.checkIn < checkOut && b.checkOut > checkIn);
+  if (overlap) { showFormError(`Room already booked by ${overlap.guestName} (${fmtDate(overlap.checkIn)} – ${fmtDate(overlap.checkOut)}).`); return; }
 
-  const baseData = {
+  const bookingData = {
     guestName, nationality: document.getElementById('f-nationality').value.trim(),
     passport: document.getElementById('f-passport').value.trim(),
     phone: document.getElementById('f-phone').value.trim(),
     email: document.getElementById('f-email').value.trim(),
-    checkIn, checkOut,
+    room, checkIn, checkOut,
     adults: document.getElementById('f-adults').value || '1',
     children: document.getElementById('f-children').value || '0',
     childrenAges: getChildrenAges(),
     mealPlan: document.getElementById('f-meal').value,
     source: document.getElementById('f-source').value,
     price: parseFloat(price) || 0,
-    guestType: document.getElementById('f-guest-type').value,
     currency: document.getElementById('f-currency').value,
     exchangeRate: parseFloat(document.getElementById('f-rate').value) || 320,
     paymentMethod: document.getElementById('f-payment').value,
     notes: document.getElementById('f-notes').value.trim(),
   };
 
-  if (isEditing) {
+  if (editingId) {
     const idx = bookings.findIndex(b => b.id === editingId);
-    bookings[idx] = { ...bookings[idx], ...baseData, room: rooms[0], updatedBy: currentUser.name, updatedAt: new Date().toISOString() };
+    bookings[idx] = { ...bookings[idx], ...bookingData, updatedBy: currentUser.name, updatedAt: new Date().toISOString() };
     addAudit('edit_booking', `Edited booking for ${guestName} (${fmtDate(checkIn)} – ${fmtDate(checkOut)})`, '✏️');
-    document.getElementById('modal-title').textContent = '✅ Booking Saved';
   } else {
-    // One linked group id ties multi-room bookings together (useful for future grouped actions/printing).
-    const groupId = rooms.length > 1 ? ('grp_' + Date.now()) : null;
-    let lastNewId = null;
-    rooms.forEach(room => {
-      const newId = 'bk_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7);
-      invoiceCounter++;
-      bookings.push({ id: newId, invNum: invoiceCounter, ...baseData, room, groupId, addedBy: currentUser.name, addedAt: new Date().toISOString() });
-      lastNewId = newId;
-      addAudit('add_booking', `Added booking for ${guestName} — ${ROOMS.find(r=>r.id===room)?.name||room} (${fmtDate(checkIn)} – ${fmtDate(checkOut)})`, '➕');
-    });
+    const newId = 'bk_' + Date.now();
+    invoiceCounter++;
     saveInvoiceCounter();
-    editingId = lastNewId;
-    document.getElementById('modal-title').textContent = rooms.length > 1 ? `✅ Booking Saved for ${rooms.length} Rooms` : '✅ Booking Saved';
+    bookings.push({ id: newId, invNum: invoiceCounter, ...bookingData, addedBy: currentUser.name, addedAt: new Date().toISOString() });
+    editingId = newId;
+    addAudit('add_booking', `Added booking for ${guestName} — ${ROOMS.find(r=>r.id===room)?.name||room} (${fmtDate(checkIn)} – ${fmtDate(checkOut)})`, '➕');
   }
   saveBookings();
   renderCalendar(); renderStats();
   if (document.getElementById('tab-bookings').style.display !== 'none') renderBookingList();
-  if (document.getElementById('tab-schedule').style.display !== 'none') renderSchedule();
   document.getElementById('print-btn').style.display = 'inline-flex';
+  document.getElementById('modal-title').textContent = '✅ Booking Saved';
 }
 
 function deleteBooking(id) {
-  if (!isAdmin() && !hasPerm('deleteBookings')) { alert('You do not have permission to delete bookings. Contact an admin.'); return; }
+  if (!isAdmin()) { alert('Only admin can delete bookings.'); return; }
   const b = bookings.find(x => x.id === id);
   if (!confirm('Delete this booking? This cannot be undone.')) return;
   addAudit('delete_booking', `Deleted booking for ${b ? b.guestName : id}`, '🗑️');
   bookings = bookings.filter(b => b.id !== id);
   saveBookings(); renderCalendar(); renderStats(); renderBookingList();
-  if (document.getElementById('tab-schedule').style.display !== 'none') renderSchedule();
 }
 
 function showFormError(msg) {
@@ -2105,21 +1459,6 @@ function getChildrenAges() {
 // ═══════════════════════════════════════════════════════
 //  CURRENCY HELPERS
 // ═══════════════════════════════════════════════════════
-function onGuestTypeChange() {
-  const isLocal = document.getElementById('f-guest-type').value === 'local';
-  document.getElementById('guest-currency-field').style.display = isLocal ? 'none' : '';
-  document.getElementById('exchange-rate-field').style.display = isLocal ? 'none' : '';
-  document.getElementById('price-field-label').textContent = isLocal ? 'Rate / Night (LKR)' : 'Rate / Night (USD $)';
-  if (isLocal) {
-    document.getElementById('f-currency').value = 'LKR';
-    document.getElementById('f-rate').value = '1';
-    document.getElementById('converted-display').style.display = 'none';
-  } else {
-    if (document.getElementById('f-rate').value === '1') document.getElementById('f-rate').value = '320';
-  }
-  updateNights();
-}
-
 function onCurrencyChange() {
   const sel = document.getElementById('f-currency');
   const opt = sel.options[sel.selectedIndex];
@@ -2209,39 +1548,14 @@ function renderAndShowInvoice(id) {
   const totalUSD = pricePerNight * nights;
   const exchangeRate = parseFloat(b.exchangeRate) || 320;
   const currency = b.currency || 'LKR';
-  const isLocalGuest = b.guestType === 'local';
-  const curLabel = isLocalGuest ? 'LKR' : 'USD';
-  const curSym = isLocalGuest ? 'Rs ' : '$';
   const totalLocal = totalUSD * exchangeRate;
-  const vatServiceAmount = totalUSD - (totalUSD / 1.18);
-  const vatBaseAmount = totalUSD / 1.18;
   const invNum = b.invNum ? 'CV-' + String(b.invNum).padStart(3,'0') : 'CV-???';
   const today = new Date().toLocaleDateString('en-GB', { day:'2-digit', month:'long', year:'numeric' });
   const adults = b.adults || '—';
   const children = b.children || '0';
 
-  // Payment status: advance / full payment already recorded on the booking
-  // (same paymentStatus & advanceAmount used by the proforma invoice) is
-  // reflected here too — the guest invoice total is reduced by any advance
-  // already paid, and a status banner shows what's still due.
-  const paymentStatus = b.paymentStatus || 'unpaid';
-  const advanceUSD = paymentStatus === 'advance' ? (parseFloat(b.advanceAmount) || 0) : 0;
-  const balanceUSD = paymentStatus === 'paid' ? 0 : Math.max(0, totalUSD - advanceUSD);
-  const advanceLocal = advanceUSD * exchangeRate;
-  const balanceLocal = balanceUSD * exchangeRate;
-
-  let payBannerClass = 'unpaid';
-  let payBannerText = `🔴 PAYMENT PENDING — Amount Due: ${curSym}${totalUSD.toFixed(2)}`;
-  if (paymentStatus === 'advance') {
-    payBannerClass = 'advance';
-    payBannerText = `🟡 ADVANCE RECEIVED: ${curSym}${advanceUSD.toFixed(2)} &nbsp;•&nbsp; BALANCE DUE: ${curSym}${balanceUSD.toFixed(2)}`;
-  } else if (paymentStatus === 'paid') {
-    payBannerClass = 'paid';
-    payBannerText = `🟢 FULLY PAID — Thank you for your payment!`;
-  }
-
-  // Invoice logo uses admin-set value from localStorage (if any)
-  const customLogo = localStorage.getItem('cvInvoiceLogo'); // expected: dataURL or https URL
+  // The invoice logo is shared through Firestore with the rest of the app state.
+  const customLogo = invoiceLogo;
   const logoHTML = customLogo
     ? `<img src="${customLogo}" alt="Crystal Villa Logo" style="width:72px;height:72px;object-fit:contain;" />`
     : `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="48" height="48">
@@ -2299,8 +1613,6 @@ function renderAndShowInvoice(id) {
     </div>
   </div>
 
-  <div class="pf-status-banner ${payBannerClass}">${payBannerText}</div>
-
   <div class="inv-section">
     <div class="inv-section-title">Charges</div>
     <table class="inv-charges-table">
@@ -2309,55 +1621,43 @@ function renderAndShowInvoice(id) {
           <th>Description</th>
           <th style="text-align:right;">Rate / Night</th>
           <th style="text-align:center;">Nights</th>
-          <th style="text-align:right;">Amount (${curLabel})</th>
+          <th style="text-align:right;">Amount (USD)</th>
         </tr>
       </thead>
       <tbody>
         <tr>
           <td>${room.name} – ${MEAL_LABELS[b.mealPlan] || b.mealPlan || 'Accommodation'}</td>
-          <td style="text-align:right;">${curSym}${pricePerNight.toFixed(2)}</td>
+          <td style="text-align:right;">$${pricePerNight.toFixed(2)}</td>
           <td style="text-align:center;">${nights}</td>
-          <td style="text-align:right;">${curSym}${totalUSD.toFixed(2)}</td>
+          <td style="text-align:right;">$${totalUSD.toFixed(2)}</td>
         </tr>
-        ${(!isLocalGuest && currency !== 'USD') ? `<tr>
+        ${currency !== 'USD' ? `<tr>
           <td colspan="2" style="color:#666;font-size:11px;">Equivalent in ${currency} (Rate: 1 USD = ${exchangeRate})</td>
           <td style="text-align:center;color:#666;font-size:11px;">${nights}</td>
           <td style="text-align:right;color:#666;font-size:11px;">${currency} ${totalLocal.toLocaleString(undefined,{maximumFractionDigits:2})}</td>
         </tr>` : ''}
         <tr>
-          <td colspan="3" style="color:#666;font-size:11px;">Room Charge (Excl. VAT &amp; Service)</td>
-          <td style="text-align:right;color:#666;font-size:11px;">${curSym}${vatBaseAmount.toFixed(2)}</td>
+          <td colspan="3" style="text-align:right;font-weight:600;">Sub Total</td>
+          <td style="text-align:right;font-weight:600;">$${totalUSD.toFixed(2)}</td>
         </tr>
         <tr>
-          <td colspan="3" style="color:#666;font-size:11px;">VAT &amp; Service Charge (18%) — Included</td>
-          <td style="text-align:right;color:#666;font-size:11px;">${curSym}${vatServiceAmount.toFixed(2)}</td>
+          <td colspan="3" style="text-align:right;color:#888;">Tax / Service</td>
+          <td style="text-align:right;color:#888;">Included</td>
         </tr>
-        <tr>
-          <td colspan="3" style="text-align:right;font-weight:600;">Sub Total (Incl. VAT &amp; Service)</td>
-          <td style="text-align:right;font-weight:600;">${curSym}${totalUSD.toFixed(2)}</td>
-        </tr>
-        ${advanceUSD > 0 ? `<tr>
-          <td colspan="3" style="text-align:right;">Advance Paid</td>
-          <td style="text-align:right;">- ${curSym}${advanceUSD.toFixed(2)}</td>
-        </tr>
-        ${(!isLocalGuest && currency !== 'USD') ? `<tr>
-          <td colspan="3" style="text-align:right;color:#666;font-size:11px;">Advance Paid in ${currency}</td>
-          <td style="text-align:right;color:#666;font-size:11px;">- ${currency} ${advanceLocal.toLocaleString(undefined,{maximumFractionDigits:2})}</td>
-        </tr>` : ''}` : ''}
       </tbody>
       <tfoot>
         <tr class="inv-total-row">
-          <td colspan="3" style="text-align:right;">${paymentStatus === 'paid' ? 'PAID IN FULL' : (advanceUSD > 0 ? 'BALANCE DUE' : 'TOTAL DUE')} (${curLabel})</td>
-          <td style="text-align:right;">${curSym}${balanceUSD.toFixed(2)}</td>
+          <td colspan="3" style="text-align:right;">TOTAL DUE (USD)</td>
+          <td style="text-align:right;">$${totalUSD.toFixed(2)}</td>
         </tr>
-        ${(!isLocalGuest && currency !== 'USD') ? `<tr class="inv-total-row">
-          <td colspan="3" style="text-align:right;font-size:11px;">${paymentStatus === 'paid' ? 'PAID IN FULL' : (advanceUSD > 0 ? 'BALANCE DUE' : 'TOTAL')} IN ${currency}</td>
-          <td style="text-align:right;font-size:11px;">${currency} ${balanceLocal.toLocaleString(undefined,{maximumFractionDigits:2})}</td>
+        ${currency !== 'USD' ? `<tr class="inv-total-row">
+          <td colspan="3" style="text-align:right;font-size:11px;">TOTAL IN ${currency}</td>
+          <td style="text-align:right;font-size:11px;">${currency} ${totalLocal.toLocaleString(undefined,{maximumFractionDigits:2})}</td>
         </tr>` : ''}
       </tfoot>
     </table>
     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-top:6px;">
-      <div class="inv-amount-words">Amount in words: <em>${numberToWords(Math.round(balanceUSD))} ${isLocalGuest ? 'Sri Lankan Rupees' : 'US Dollars'} Only</em></div>
+      <div class="inv-amount-words">Amount in words: <em>${numberToWords(Math.round(totalUSD))} US Dollars Only</em></div>
       ${b.paymentMethod ? `<span style="background:${payBadgeColor(b.paymentMethod).bg};color:${payBadgeColor(b.paymentMethod).text};border-radius:4px;padding:3px 12px;font-size:12px;font-weight:700;">${payIcon(b.paymentMethod)} ${b.paymentMethod}</span>` : ''}
     </div>
   </div>
@@ -2401,75 +1701,10 @@ function renderAndShowInvoice(id) {
 
   document.getElementById('print-area').innerHTML = html;
   document.getElementById('invoice-modal').classList.add('open');
-  currentInvoiceId = id;
 }
 
-function closeInvoice() { document.getElementById('invoice-modal').classList.remove('open'); currentInvoiceId = null; }
+function closeInvoice() { document.getElementById('invoice-modal').classList.remove('open'); }
 function printInvoice() { window.print(); }
-
-// ═══════════════════════════════════════════════════════
-//  DOWNLOAD INVOICE AS PDF (works on mobile, unlike relying
-//  solely on window.print() which many mobile browsers /
-//  in-app webviews don't handle well)
-// ═══════════════════════════════════════════════════════
-let currentInvoiceId = null;
-function downloadInvoicePDF() {
-  const el = document.getElementById('print-area');
-  if (!el || !el.innerHTML.trim()) return;
-  const b = bookings.find(x => x.id === currentInvoiceId);
-  const invNum = (b && b.invNum) ? 'CV-' + String(b.invNum).padStart(3, '0') : 'invoice';
-  const guestPart = b ? b.guestName.replace(/[^a-z0-9]+/gi, '-').replace(/^-+|-+$/g, '') : 'guest';
-  const filename = `${invNum}-${guestPart}.pdf`;
-
-  const btn = document.getElementById('download-pdf-btn');
-  const originalLabel = btn.innerHTML;
-  btn.disabled = true;
-  btn.innerHTML = '⏳ Generating...';
-
-  // Force a fixed desktop-style width during capture so the exported PDF always
-  // uses the full multi-column invoice layout, even when this is triggered from
-  // a narrow mobile screen (where the on-screen mobile CSS would otherwise stack
-  // the fields into a single column and throw off the A4 sizing/alignment).
-  const CAPTURE_WIDTH = 780; // px, matches the invoice's normal desktop width
-  const prevWidth = el.style.width;
-  const prevMaxWidth = el.style.maxWidth;
-  el.style.width = CAPTURE_WIDTH + 'px';
-  el.style.maxWidth = CAPTURE_WIDTH + 'px';
-
-  const opt = {
-    margin: [8, 8, 8, 8],
-    filename: filename,
-    image: { type: 'jpeg', quality: 0.98 },
-    html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff', width: CAPTURE_WIDTH, windowWidth: CAPTURE_WIDTH },
-    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-    pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
-  };
-
-  const restoreWidth = () => { el.style.width = prevWidth; el.style.maxWidth = prevMaxWidth; };
-
-  if (typeof html2pdf === 'undefined') {
-    // Fallback if the PDF library failed to load (e.g. offline) — use print dialog instead
-    restoreWidth();
-    btn.disabled = false;
-    btn.innerHTML = originalLabel;
-    alert('PDF library could not load (check your internet connection). Opening print dialog instead — choose "Save as PDF" there.');
-    window.print();
-    return;
-  }
-
-  html2pdf().set(opt).from(el).save().then(() => {
-    restoreWidth();
-    btn.disabled = false;
-    btn.innerHTML = originalLabel;
-    addAudit('download_invoice', `Downloaded PDF invoice for ${b ? b.guestName : ''}`, '📥');
-  }).catch(err => {
-    console.error('PDF generation failed:', err);
-    restoreWidth();
-    btn.disabled = false;
-    btn.innerHTML = originalLabel;
-    alert('Could not generate the PDF. Please try the Print button instead.');
-  });
-}
 
 // ═══════════════════════════════════════════════════════
 //  NUMBER TO WORDS
@@ -2492,14 +1727,14 @@ function numberToWords(num) {
 //  EXPORT
 // ═══════════════════════════════════════════════════════
 function exportExcel() {
-  const rows = [['Invoice#','Guest Name','Guest Type','Nationality','Passport/NIC','Phone','Email','Room','Room Type','Check-in','Check-out','Nights','Adults','Children','Meal Plan','Source','Rate/Night','Total','Currency','Exch Rate','Total Local','Payment Method','Notes','Status','Added By','Added Date']];
+  const rows = [['Invoice#','Guest Name','Nationality','Passport/NIC','Phone','Email','Room','Room Type','Check-in','Check-out','Nights','Adults','Children','Meal Plan','Source','Rate/Night (USD)','Total USD','Currency','Exch Rate','Total Local','Payment Method','Notes','Status','Added By','Added Date']];
   bookings.sort((a,b) => a.checkIn.localeCompare(b.checkIn)).forEach(b => {
     const room = ROOMS.find(r => r.id === b.room) || { name: b.room, type: '' };
     const nights = daysBetween(b.checkIn, b.checkOut);
     const totalUSD = (parseFloat(b.price)||0) * nights;
     const totalLocal = totalUSD * (parseFloat(b.exchangeRate)||320);
     const invNum = b.invNum ? 'CV-'+String(b.invNum).padStart(3,'0') : '';
-    rows.push([invNum, b.guestName, b.guestType==='local'?'Local':'Foreign', b.nationality||'', b.passport||'', b.phone||'', b.email||'', room.name, room.type, b.checkIn, b.checkOut, nights, b.adults||'', b.children||'', b.mealPlan||'', b.source||'', b.price, totalUSD.toFixed(2), b.currency||'LKR', b.exchangeRate||320, totalLocal.toFixed(2), b.paymentMethod||'', b.notes||'', getStatus(b), b.addedBy||'', (b.addedAt||'').split('T')[0]]);
+    rows.push([invNum, b.guestName, b.nationality||'', b.passport||'', b.phone||'', b.email||'', room.name, room.type, b.checkIn, b.checkOut, nights, b.adults||'', b.children||'', b.mealPlan||'', b.source||'', b.price, totalUSD.toFixed(2), b.currency||'LKR', b.exchangeRate||320, totalLocal.toFixed(2), b.paymentMethod||'', b.notes||'', getStatus(b), b.addedBy||'', (b.addedAt||'').split('T')[0]]);
   });
   const csv = rows.map(r => r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
   const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
@@ -2535,31 +1770,6 @@ function populateSelects() {
       opt.value = r.id; opt.textContent = `${r.name} (${r.type})`; sel.appendChild(opt);
     });
   });
-  renderRoomChipGrid();
-}
-
-// ═══════════════════════════════════════════════════════
-//  MULTI-ROOM SELECTION (Add Booking)
-// ═══════════════════════════════════════════════════════
-let selectedRoomIds = [];
-function renderRoomChipGrid() {
-  const grid = document.getElementById('room-chip-grid');
-  if (!grid) return;
-  grid.innerHTML = ROOMS.map(r => `
-    <button type="button" class="room-chip" id="room-chip-${r.id}" onclick="toggleRoomChip('${r.id}')">
-      ${r.name}<span class="rc-type">${r.type}</span>
-    </button>`).join('');
-}
-function toggleRoomChip(roomId) {
-  const btn = document.getElementById('room-chip-' + roomId);
-  if (!btn) return;
-  const idx = selectedRoomIds.indexOf(roomId);
-  if (idx === -1) { selectedRoomIds.push(roomId); btn.classList.add('selected'); }
-  else { selectedRoomIds.splice(idx, 1); btn.classList.remove('selected'); }
-}
-function resetRoomChips() {
-  selectedRoomIds = [];
-  document.querySelectorAll('.room-chip').forEach(b => b.classList.remove('selected'));
 }
 function todayStr() { const d = new Date(); return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; }
 function daysInMonth(y, m) { return new Date(y, m+1, 0).getDate(); }
@@ -2568,146 +1778,6 @@ function daysBetween(d1, d2) { return Math.max(0, Math.round((new Date(d2) - new
 function bookingOn(roomId, dateStr) { return bookings.find(b => b.room === roomId && b.checkIn <= dateStr && b.checkOut > dateStr); }
 function getStatus(b) { const t = todayStr(); if (b.checkOut <= t) return 'past'; if (b.checkIn <= t) return 'active'; return 'upcoming'; }
 function fmtDate(d) { if (!d) return ''; return new Date(d + 'T00:00:00').toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' }); }
-function addDays(dateStr, n) {
-  const dt = new Date(dateStr + 'T00:00:00');
-  dt.setDate(dt.getDate() + n);
-  return `${dt.getFullYear()}-${pad(dt.getMonth()+1)}-${pad(dt.getDate())}`;
-}
-
-// ═══════════════════════════════════════════════════════
-//  DARK / LIGHT MODE
-// ═══════════════════════════════════════════════════════
-function updateThemeButton() {
-  const btn = document.getElementById('theme-toggle-btn');
-  if (!btn) return;
-  const isDark = document.body.classList.contains('dark-mode');
-  btn.textContent = isDark ? '☀️' : '🌙';
-  btn.title = isDark ? 'Switch to light mode' : 'Switch to dark mode';
-}
-function toggleTheme() {
-  const isDark = document.body.classList.toggle('dark-mode');
-  try { localStorage.setItem('cvTheme', isDark ? 'dark' : 'light'); } catch (e) {}
-  updateThemeButton();
-}
-function initTheme() {
-  let saved = null;
-  try { saved = localStorage.getItem('cvTheme'); } catch (e) {}
-  const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-  const useDark = saved ? saved === 'dark' : prefersDark;
-  if (useDark) document.body.classList.add('dark-mode');
-  updateThemeButton();
-}
-
-// ═══════════════════════════════════════════════════════
-//  ARRIVALS / DEPARTURES (SCHEDULE) TAB
-// ═══════════════════════════════════════════════════════
-let scheduleView = 'checkin'; // 'checkin' | 'checkout'
-let scheduleRange = 'today';  // yesterday | today | tomorrow | next7 | next30 | future | all
-
-function setScheduleView(view, btn) {
-  scheduleView = view;
-  document.querySelectorAll('#schedule-toggle button').forEach(b => b.classList.remove('active'));
-  if (btn) btn.classList.add('active');
-  renderSchedule();
-}
-function setScheduleRange(range, btn) {
-  scheduleRange = range;
-  document.querySelectorAll('#schedule-filters .schedule-chip').forEach(b => b.classList.remove('active'));
-  if (btn) btn.classList.add('active');
-  renderSchedule();
-}
-function computeRangeBounds(range) {
-  const t = todayStr();
-  switch (range) {
-    case 'yesterday': { const y = addDays(t, -1); return [y, y]; }
-    case 'today': return [t, t];
-    case 'tomorrow': { const tm = addDays(t, 1); return [tm, tm]; }
-    case 'next7': return [t, addDays(t, 6)];
-    case 'next30': return [t, addDays(t, 29)];
-    case 'future': return [addDays(t, 1), '9999-12-31'];
-    case 'all': default: return [null, null];
-  }
-}
-function renderSchedule() {
-  const grid = document.getElementById('schedule-list-grid');
-  if (!grid) return;
-  const dateField = scheduleView === 'checkin' ? 'checkIn' : 'checkOut';
-  const [start, end] = computeRangeBounds(scheduleRange);
-  let list = [...bookings];
-  if (start && end) list = list.filter(b => b[dateField] >= start && b[dateField] <= end);
-  list.sort((a, b) => a[dateField].localeCompare(b[dateField]) || a.guestName.localeCompare(b.guestName));
-
-  if (list.length === 0) {
-    const label = scheduleView === 'checkin' ? 'arrivals' : 'departures';
-    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="big">${scheduleView === 'checkin' ? '🛬' : '🛫'}</div><p>No ${label} in this range</p></div>`;
-    return;
-  }
-
-  grid.innerHTML = list.map(b => {
-    const room = ROOMS.find(r => r.id === b.room) || { name: 'Unknown', color: '#eee', text: '#333' };
-    const status = getStatus(b);
-    const nights = daysBetween(b.checkIn, b.checkOut);
-    const relevantDate = b[dateField];
-    const t = todayStr();
-    let dayTag = '';
-    if (relevantDate === t) dayTag = 'Today';
-    else if (relevantDate === addDays(t, -1)) dayTag = 'Yesterday';
-    else if (relevantDate === addDays(t, 1)) dayTag = 'Tomorrow';
-    return `
-    <div class="bk-card">
-      <div class="bk-card-top">
-        <div class="bk-guest">${b.guestName}</div>
-        <span class="room-tag" style="background:${room.color};color:${room.text}">${room.name}</span>
-      </div>
-      <div class="bk-info">
-        <span>${scheduleView === 'checkin' ? '🛬 Check-in' : '🛫 Check-out'}: ${fmtDate(relevantDate)}${dayTag ? ` (${dayTag})` : ''}</span>
-        <span>📅 ${fmtDate(b.checkIn)} → ${fmtDate(b.checkOut)}</span>
-        <span>🌙 ${nights} night${nights !== 1 ? 's' : ''}</span>
-        ${b.phone ? `<span>📞 ${b.phone}</span>` : ''}
-        <span><span class="status-dot ${status}">● ${status.charAt(0).toUpperCase() + status.slice(1)}</span></span>
-      </div>
-      <div class="bk-footer">
-        <div style="font-size:11px;color:var(--text3);">Added by: ${b.addedBy || '—'}</div>
-        <div class="card-actions">
-          <button class="icon-action" title="View / Edit" onclick="openEditModal('${b.id}')">✏️</button>
-          <button class="icon-action" title="Print Invoice" onclick="openInvoiceById('${b.id}')">🖨️</button>
-        </div>
-      </div>
-    </div>`;
-  }).join('');
-}
-
-// ═══════════════════════════════════════════════════════
-//  TODAY'S ARRIVALS POPUP (shown once per login, after sign-in)
-// ═══════════════════════════════════════════════════════
-function checkTodayArrivals() {
-  const t = todayStr();
-  const arrivals = bookings.filter(b => b.checkIn === t).sort((a, b) => a.guestName.localeCompare(b.guestName));
-  if (!arrivals.length) return;
-
-  const listEl = document.getElementById('today-arrivals-list');
-  listEl.innerHTML = arrivals.map(b => {
-    const room = ROOMS.find(r => r.id === b.room) || { name: 'Unknown', color: '#eee', text: '#333' };
-    const nights = daysBetween(b.checkIn, b.checkOut);
-    return `
-    <div class="bk-card" style="padding:12px 14px;">
-      <div class="bk-card-top" style="margin-bottom:6px;">
-        <div class="bk-guest">${b.guestName}</div>
-        <span class="room-tag" style="background:${room.color};color:${room.text}">${room.name}</span>
-      </div>
-      <div class="bk-info">
-        <span>🛬 Arriving today · staying ${nights} night${nights !== 1 ? 's' : ''}</span>
-        ${b.phone ? `<span>📞 ${b.phone}</span>` : ''}
-        ${b.mealPlan ? `<span>🍽️ ${MEAL_LABELS[b.mealPlan] || b.mealPlan}</span>` : ''}
-      </div>
-    </div>`;
-  }).join('');
-
-  document.getElementById('today-arrivals-modal').classList.add('open');
-}
-function closeTodayArrivalsModal() {
-  document.getElementById('today-arrivals-modal').classList.remove('open');
-}
 
 // ═══════════════════════════════════════════════════════
 //  CANCEL BOOKING
@@ -2763,368 +1833,19 @@ function confirmCancelBooking() {
   renderCalendar();
   renderStats();
   if (document.getElementById('tab-bookings').style.display !== 'none') renderBookingList();
-  if (document.getElementById('tab-schedule').style.display !== 'none') renderSchedule();
-}
-
-// ═══════════════════════════════════════════════════════
-//  GUEST PAYMENT REQUEST / PROFORMA INVOICE
-//  Generates a self-contained shareable link (booking details are
-//  base64-encoded directly into the URL) so a guest can view, print
-//  or download their payment request without logging in and without
-//  exposing any other booking data.
-// ═══════════════════════════════════════════════════════
-const BANK_DETAILS_LOCAL = {
-  payee: 'CRYSTAL VILLAS (PVT) LTD',
-  account: '0072568952',
-  bank: 'BANK OF CEYLON',
-  branch: 'DEHIWALA BRANCH',
-  country: 'SRI LANKA',
-  swift: 'BCEYLKLX',
-  bankBranchCode: '7010 / 051'
-};
-const BANK_DETAILS_FOREIGN = {
-  payee: 'CRYSTAL HOLIDAYS PVT LTD (Head Office)',
-  account: '830 15324',
-  accountLabel: 'FOREIGN CURRENCY A/C NO.',
-  bank: 'BANK OF CEYLON',
-  branch: 'DEHIWALA BRANCH',
-  country: 'SRI LANKA',
-  swift: 'BCEYLKLX',
-  bankBranchCode: '7010 / 051'
-};
-
-function defaultLogoSVG(size) {
-  size = size || 48;
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="${size}" height="${size}">
-        <circle cx="50" cy="42" r="9" fill="none" stroke="white" stroke-width="2.5"/>
-        <line x1="45" y1="42" x2="55" y2="42" stroke="white" stroke-width="2"/>
-        <line x1="50" y1="37" x2="50" y2="47" stroke="white" stroke-width="2"/>
-        <path d="M 28 52 Q 35 45 42 52 Q 49 59 56 52 Q 63 45 72 52" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
-        <line x1="22" y1="64" x2="78" y2="64" stroke="white" stroke-width="2"/>
-        <path d="M 18 80 Q 30 74 42 80 Q 54 86 66 80 Q 76 74 82 80 L 82 98 Q 54 90 18 98 Z" fill="white"/>
-      </svg>`;
-}
-
-// Small badge shown on each booking card so admins can see payment status at a glance.
-function pfCardBadge(b) {
-  const status = b.paymentStatus || 'unpaid';
-  const curSym = b.guestType === 'local' ? 'Rs ' : '$';
-  if (status === 'paid') return `<span class="pf-card-badge paid">🟢 Paid</span>`;
-  if (status === 'advance') return `<span class="pf-card-badge advance">🟡 Advance ${curSym}${(parseFloat(b.advanceAmount)||0).toLocaleString(undefined,{maximumFractionDigits:2})}</span>`;
-  return `<span class="pf-card-badge unpaid">🔴 Unpaid</span>`;
-}
-
-// Builds a normalized "info" object from a live booking record (admin side).
-function buildInfoFromBooking(b) {
-  const room = ROOMS.find(r => r.id === b.room) || { name: b.room, type: '' };
-  const nights = daysBetween(b.checkIn, b.checkOut);
-  const pricePerNight = parseFloat(b.price) || 0;
-  const total = pricePerNight * nights;
-  const isLocalGuest = b.guestType === 'local';
-  const invNum = b.invNum ? 'PF-' + String(b.invNum).padStart(3, '0') : 'PF-???';
-
-  // Use the admin-uploaded logo (same one used on the full invoice) when available.
-  const customLogo = localStorage.getItem('cvInvoiceLogo');
-  const logoHTML = customLogo
-    ? `<img src="${customLogo}" alt="Crystal Villa Logo" style="width:72px;height:72px;object-fit:contain;" />`
-    : defaultLogoSVG(48);
-
-  return {
-    invNum,
-    dateStr: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' }),
-    guestName: b.guestName,
-    arrival: fmtDate(b.checkIn),
-    departure: fmtDate(b.checkOut),
-    nights,
-    roomLabel: `${room.name} (${room.type})`,
-    curSym: isLocalGuest ? 'Rs ' : '$',
-    curLabel: isLocalGuest ? 'LKR' : 'USD',
-    isLocalGuest,
-    total,
-    remark: b.pfRemark || '',
-    paymentStatus: b.paymentStatus || 'unpaid',
-    advanceAmount: b.advanceAmount || 0,
-    logoHTML
-  };
-}
-
-// Renders the actual proforma invoice HTML (matches the Crystal Villa Word invoice
-// format: Details / Currency / Amount table, amount in words, bank details, remark
-// and a note about bank charges) — shared by both the admin preview and the public
-// guest-facing link so they always look identical.
-function buildProformaHTML(info) {
-  const advance = info.paymentStatus === 'advance' ? (parseFloat(info.advanceAmount) || 0) : 0;
-  const balance = Math.max(0, info.total - advance);
-
-  // Pick the right settlement account: local guests pay into the LKR
-  // Crystal Villas account, foreign guests pay into the Crystal Holidays
-  // foreign currency account. Fall back to curLabel for older payment
-  // links generated before isLocalGuest was stored in the payload.
-  const isLocal = typeof info.isLocalGuest === 'boolean' ? info.isLocalGuest : (info.curLabel === 'LKR');
-  const bank = isLocal ? BANK_DETAILS_LOCAL : BANK_DETAILS_FOREIGN;
-
-  let bannerClass = 'unpaid';
-  let bannerText = `🔴 PAYMENT PENDING — Amount Due: ${info.curSym}${info.total.toFixed(2)}`;
-  if (info.paymentStatus === 'advance') {
-    bannerClass = 'advance';
-    bannerText = `🟡 ADVANCE RECEIVED: ${info.curSym}${advance.toFixed(2)} &nbsp;•&nbsp; BALANCE DUE: ${info.curSym}${balance.toFixed(2)}`;
-  } else if (info.paymentStatus === 'paid') {
-    bannerClass = 'paid';
-    bannerText = `🟢 FULLY PAID — Thank you for your payment!`;
-  }
-
-  const detailsLines = [
-    `<div><strong>Guest:</strong> ${info.guestName}</div>`,
-    `<div><strong>Arrival &amp; Departure:</strong> ${info.arrival} → ${info.departure} (${info.nights} night${info.nights !== 1 ? 's' : ''})</div>`,
-    `<div><strong>Room Type &amp; No. of Rooms:</strong> ${info.roomLabel}</div>`,
-    info.remark ? `<div><strong>Remark:</strong> ${info.remark}</div>` : ''
-  ].join('');
-
-  return `
-<div class="pf-wrap">
-  <div class="inv-header" style="margin-bottom:10px;">
-    <div class="inv-logo-block">
-      <div class="inv-logo-circle">${info.logoHTML}</div>
-      <div class="inv-hotel-info">
-        <h2>Crystal Villa</h2>
-        <p>Galle Matara Road, Palena, Weligama, 81700, Sri Lanka</p>
-        <p>📞 0777 356 354 &nbsp;|&nbsp; ✉️ crys.holiday@gmail.com</p>
-        <p>www.crystalvilla.lk</p>
-      </div>
-    </div>
-    <div class="inv-title-block">
-      <h3>Proforma Invoice</h3>
-      <p><strong>Invoice No:</strong> ${info.invNum}</p>
-      <p><strong>Date:</strong> ${info.dateStr}</p>
-    </div>
-  </div>
-
-  <div class="pf-status-banner ${bannerClass}">${bannerText}</div>
-
-  <div class="pf-guest-line">This is a request for payment for the reservation detailed below. Kindly settle the amount using the bank details provided.</div>
-
-  <table class="pf-table">
-    <thead><tr><th style="width:58%;">Details</th><th style="width:15%;">Currency</th><th style="width:27%;">Amount</th></tr></thead>
-    <tbody>
-      <tr><td class="pf-details-cell">${detailsLines}</td><td>${info.curLabel}</td><td>${info.curSym}${info.total.toFixed(2)}</td></tr>
-      ${advance > 0 ? `<tr><td colspan="2" style="text-align:right;">Advance Paid</td><td>- ${info.curSym}${advance.toFixed(2)}</td></tr>` : ''}
-      <tr class="pf-total-row"><td colspan="2" style="text-align:right;">${advance > 0 ? 'BALANCE DUE' : 'TOTAL'}</td><td>${info.curSym}${(advance > 0 ? balance : info.total).toFixed(2)}</td></tr>
-    </tbody>
-  </table>
-
-  <div class="pf-amount-words">Amount in words: <em>${numberToWords(Math.round(advance > 0 ? balance : info.total))} ${info.curLabel === 'LKR' ? 'Sri Lankan Rupees' : 'US Dollars'} Only</em></div>
-
-  <div class="pf-bank-box">
-    <h4>Remittance to be made to</h4>
-    <p><strong>${bank.payee}</strong></p>
-    <p>${bank.accountLabel || 'A/C No.'}: ${bank.account}</p>
-    <p>${bank.bank}, ${bank.branch}, ${bank.country}</p>
-    <p>SWIFT Code: ${bank.swift} &nbsp;|&nbsp; Bank Code / Branch Code: ${bank.bankBranchCode}</p>
-  </div>
-
-  <div class="pf-note">PLEASE SETTLE YOUR PAYMENT WITH ALL INCOMING BANK CHARGES TO COVER THE TOTAL INVOICE AMOUNT</div>
-
-  <div class="pf-footer">
-    Crystal Villa · Galle Matara Road, Palena, Weligama, 81700, Sri Lanka · Tel: 0777 356 354 · crys.holiday@gmail.com<br>
-    This is a computer-generated proforma invoice issued for payment purposes.
-  </div>
-</div>`;
-}
-
-// ── Admin side: open / edit / save the payment request for a booking ──
-let currentPRId = null;
-let prPendingStatus = 'unpaid';
-
-function openPaymentRequestById(id) {
-  if (!isAdmin() && !hasPerm('managePayments')) { alert('You do not have permission to manage payment requests. Contact an admin.'); return; }
-  const b = bookings.find(x => x.id === id);
-  if (!b) return;
-  currentPRId = id;
-  prPendingStatus = b.paymentStatus || 'unpaid';
-  document.getElementById('pr-advance-amount').value = b.advanceAmount || '';
-  document.getElementById('pr-remark').value = b.pfRemark || '';
-  updatePRStatusButtons();
-  renderPaymentRequest(id);
-  document.getElementById('payment-request-modal').classList.add('open');
-  addAudit('open_payment_request', `Opened payment request for ${b.guestName}`, '💳');
-}
-
-function setPRStatus(status) {
-  prPendingStatus = status;
-  updatePRStatusButtons();
-}
-
-function updatePRStatusButtons() {
-  document.getElementById('pr-advance-wrap').style.display = prPendingStatus === 'advance' ? 'block' : 'none';
-  document.querySelectorAll('#pr-status-pick button').forEach(btn => {
-    const isSel = btn.dataset.status === prPendingStatus;
-    btn.classList.toggle('selected', isSel);
-    ['unpaid', 'advance', 'paid'].forEach(s => btn.classList.remove(s));
-    if (isSel) btn.classList.add(prPendingStatus);
-  });
-}
-
-function savePRStatus() {
-  const b = bookings.find(x => x.id === currentPRId);
-  if (!b) return;
-  b.paymentStatus = prPendingStatus;
-  b.advanceAmount = prPendingStatus === 'advance' ? (parseFloat(document.getElementById('pr-advance-amount').value) || 0) : 0;
-  b.pfRemark = document.getElementById('pr-remark').value.trim();
-  saveBookings();
-  addAudit('update_payment_status', `Set payment status to "${b.paymentStatus}" for ${b.guestName}${b.paymentStatus === 'advance' ? ' (advance: ' + b.advanceAmount + ')' : ''}`, '💳');
-  renderPaymentRequest(currentPRId);
-  if (document.getElementById('tab-bookings').style.display !== 'none') renderBookingList();
-}
-
-function renderPaymentRequest(id) {
-  const b = bookings.find(x => x.id === id);
-  if (!b) return;
-  document.getElementById('pr-print-area').innerHTML = buildProformaHTML(buildInfoFromBooking(b));
-}
-
-function closePaymentRequest() {
-  document.getElementById('payment-request-modal').classList.remove('open');
-  currentPRId = null;
-}
-function printPaymentRequest() { window.print(); }
-
-function downloadPaymentRequestPDF() {
-  const el = document.getElementById('pr-print-area');
-  if (!el || !el.innerHTML.trim()) return;
-  const b = bookings.find(x => x.id === currentPRId);
-  const invNum = (b && b.invNum) ? 'PF-' + String(b.invNum).padStart(3, '0') : 'payment-request';
-  const guestPart = b ? b.guestName.replace(/[^a-z0-9]+/gi, '-').replace(/^-+|-+$/g, '') : 'guest';
-  downloadElementAsPDF(el, `${invNum}-${guestPart}.pdf`, document.getElementById('pr-download-pdf-btn'));
-}
-
-// Generates a self-contained payment link — all invoice data is base64-encoded
-// straight into the URL, so the guest can open it, view status, and download/print
-// a one-page A4 PDF without ever logging in or touching the shared booking database.
-function copyPaymentLink() {
-  const b = bookings.find(x => x.id === currentPRId);
-  if (!b) return;
-
-  // Make sure whatever is currently in the form (even if not saved yet) goes into the link.
-  savePRStatus();
-
-  const info = buildInfoFromBooking(bookings.find(x => x.id === currentPRId));
-  // The link itself must stay short and reliable (WhatsApp/SMS-safe), so it always
-  // uses the default icon logo rather than embedding a large uploaded logo image —
-  // the admin preview above already shows your real logo for you to check.
-  info.logoHTML = defaultLogoSVG(48);
-  const payload = JSON.stringify(info);
-  // encodeURIComponent is required here: base64 can contain '+' characters, and
-  // URLSearchParams treats a literal '+' in a query string as a space, which would
-  // silently corrupt the data when the guest's browser parses the link.
-  const encoded = encodeURIComponent(btoa(unescape(encodeURIComponent(payload))));
-  const url = `${location.origin}${location.pathname}?pay=${encoded}`;
-
-  const finish = () => {
-    showLinkToast();
-    addAudit('send_payment_request', `Generated payment request link for ${b.guestName}`, '🔗');
-  };
-
-  if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(url).then(finish).catch(() => { window.prompt('Copy this payment link and send it to the guest:', url); finish(); });
-  } else {
-    window.prompt('Copy this payment link and send it to the guest:', url);
-    finish();
-  }
-}
-
-function showLinkToast() {
-  const t = document.getElementById('link-copied-toast');
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2500);
-}
-
-// ── Guest side: public, no-login page rendered from the link's embedded data ──
-function tryShowGuestPaymentPage() {
-  const params = new URLSearchParams(location.search);
-  const encoded = params.get('pay');
-  if (!encoded) return false;
-
-  let info = null;
-  try { info = JSON.parse(decodeURIComponent(escape(atob(encoded)))); } catch (e) { info = null; }
-
-  document.getElementById('screen-login').classList.remove('active');
-  document.getElementById('screen-pay').classList.add('active');
-  const contentEl = document.getElementById('guest-pay-content');
-
-  if (!info || !info.guestName || typeof info.total !== 'number') {
-    contentEl.innerHTML = `<div class="pay-page-error"><div style="font-size:40px;margin-bottom:10px;">⚠️</div><p>This payment link looks invalid or incomplete. Please contact Crystal Villa for a new link.</p></div>`;
-    document.getElementById('guest-download-pdf-btn').style.display = 'none';
-    return true;
-  }
-  contentEl.innerHTML = buildProformaHTML(info);
-  return true;
-}
-
-function downloadGuestPaymentPDF() {
-  const el = document.getElementById('guest-pay-content');
-  if (!el || !el.innerHTML.trim()) return;
-  const nameMatch = el.querySelector('.inv-title-block p');
-  downloadElementAsPDF(el, 'Crystal-Villa-Payment-Request.pdf', document.getElementById('guest-download-pdf-btn'));
-}
-
-// Shared html2pdf helper — forces a fixed desktop-style width during capture so the
-// exported PDF always uses the full layout (not the stacked mobile layout), and fits
-// cleanly on a single A4 page, matching the behaviour of the main invoice download.
-function downloadElementAsPDF(el, filename, btn) {
-  const originalLabel = btn ? btn.innerHTML : null;
-  if (btn) { btn.disabled = true; btn.innerHTML = '⏳ Generating...'; }
-
-  const CAPTURE_WIDTH = 780;
-  const prevWidth = el.style.width;
-  const prevMaxWidth = el.style.maxWidth;
-  el.style.width = CAPTURE_WIDTH + 'px';
-  el.style.maxWidth = CAPTURE_WIDTH + 'px';
-
-  const opt = {
-    margin: [8, 8, 8, 8],
-    filename: filename,
-    image: { type: 'jpeg', quality: 0.98 },
-    html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff', width: CAPTURE_WIDTH, windowWidth: CAPTURE_WIDTH },
-    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-    pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
-  };
-
-  const restore = () => { el.style.width = prevWidth; el.style.maxWidth = prevMaxWidth; };
-
-  if (typeof html2pdf === 'undefined') {
-    restore();
-    if (btn) { btn.disabled = false; btn.innerHTML = originalLabel; }
-    alert('PDF library could not load (check your internet connection). Opening print dialog instead — choose "Save as PDF" there.');
-    window.print();
-    return;
-  }
-
-  html2pdf().set(opt).from(el).save().then(() => {
-    restore();
-    if (btn) { btn.disabled = false; btn.innerHTML = originalLabel; }
-  }).catch(err => {
-    console.error('PDF generation failed:', err);
-    restore();
-    if (btn) { btn.disabled = false; btn.innerHTML = originalLabel; }
-    alert('PDF generation failed. Please try the Print button instead.');
-  });
 }
 
 // ═══════════════════════════════════════════════════════
 //  INIT
 // ═══════════════════════════════════════════════════════
 (async function init() {
-  initTheme();
-  // A shared guest payment link (?pay=...) bypasses login entirely — the invoice
-  // data travels inside the URL itself, so no booking database access is needed.
-  if (tryShowGuestPaymentPage()) return;
   document.getElementById('inp-password').addEventListener('keydown', e => { if (e.key==='Enter') loginWithPassword(); });
   document.getElementById('inp-username').addEventListener('keydown', e => { if (e.key==='Enter') document.getElementById('inp-password').focus(); });
   loadSavedCredentials();
   // Load extraUsers/bookings/etc from Firebase up front so login works for non-builtin accounts too.
-  await loadData();
+  const loaded = await loadData();
   const saved = loadSession();
-  if (saved) {
+  if (loaded && saved) {
     const acc = getAccount(saved);
     if (acc) doLogin(saved, acc);
   }
